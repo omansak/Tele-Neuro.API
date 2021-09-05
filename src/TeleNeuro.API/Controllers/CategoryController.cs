@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
+using System.Threading.Tasks;
 using TeleNeuro.API.Models;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.CategoryService;
@@ -19,20 +19,33 @@ namespace TeleNeuro.API.Controllers
             _categoryService = categoryService;
         }
 
-        [HttpPost]
-        public async Task<BaseResponse> GetActiveCategories()
+        [HttpGet]
+        public async Task<BaseResponse> ListActiveCategories()
         {
-            return new BaseResponse().SetResult(await _categoryService.GetActiveCategories());
+            return new BaseResponse().SetResult(await _categoryService.ListActiveCategories());
+        }
+        [HttpGet]
+        public async Task<BaseResponse> ListCategories()
+        {
+            return new BaseResponse().SetResult(await _categoryService.ListCategories());
         }
 
         [HttpPost]
-        public async Task<BaseResponse> InsertCategory(CategoryModel model)
+        public async Task<BaseResponse> UpdateCategory(CategoryModel model)
         {
-            return new BaseResponse().SetResult(await _categoryService.InsertCategory(new Category
+            return new BaseResponse().SetResult(await _categoryService.UpdateCategory(new Category
             {
                 Name = model.Name,
-                Description = model.Description
+                Description = model.Description,
+                Id = model.Id
             }));
         }
+
+        [HttpPost]
+        public async Task<BaseResponse> ToggleCategoryStatus(CategoryModel model)
+        {
+            return new BaseResponse().SetResult(await _categoryService.ToggleCategoryStatus(model.Id));
+        }
+
     }
 }
