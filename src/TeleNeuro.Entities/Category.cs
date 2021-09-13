@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,7 +22,5 @@ namespace TeleNeuro.Entities
         public string CreatedUser { get; set; }
         [Column("DOCUMENT_GUID")]
         public string DocumentGuid { get; set; }
-        [NotMapped]
-        public Document Document { get; set; }
     }
 }

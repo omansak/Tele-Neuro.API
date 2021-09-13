@@ -38,7 +38,7 @@ namespace TeleNeuro.API.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 IsActive = model.IsActive,
-                DocumentGuid = (await _documentImageService.SaveAsync(model.Image?.OpenReadStream())).Guid
+                DocumentGuid = model.Image != null ? (await _documentImageService.SaveAsync(model.Image.OpenReadStream())).Guid : null
             }));
         }
         [HttpPost]
