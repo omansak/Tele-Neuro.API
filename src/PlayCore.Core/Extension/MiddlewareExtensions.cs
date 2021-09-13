@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Logging;
 using PlayCore.Core.LocalizationString;
 using PlayCore.Core.Middleware.GlobalExceptionHandler;
 using System;

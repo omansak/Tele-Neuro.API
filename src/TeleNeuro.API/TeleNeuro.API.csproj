@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="wwwroot\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -15,8 +22,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PlayCore.Core\PlayCore.Core.csproj" />
+    <ProjectReference Include="..\Service.Document.Image.ImageSharp\Service.Document.Image.ImageSharp.csproj" />
     <ProjectReference Include="..\TeleNeuro.Entity.Context\TeleNeuro.Entity.Context.csproj" />
     <ProjectReference Include="..\TeleNeuro.Service.CategoryService\TeleNeuro.Service.CategoryService.csproj" />
+    <ProjectReference Include="..\TeleNeuro.Service.DocumentService\TeleNeuro.Service.DocumentService.csproj" />
   </ItemGroup>
 
 </Project>
