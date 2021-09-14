@@ -122,19 +122,23 @@ namespace TeleNeuro.Service.CategoryService
             {
                 query = query.Where(expression);
             }
+
+            var queryableCategory = query
+               .OrderByDescending(i => i.IsActive)
+               .ThenByDescending(i => i.CreatedDate)
+               .Join(_documentRepository.GetQueryable(), i => i.DocumentGuid, j => j.Guid, (i, j) => new CategoryInfo
+               {
+                   Category = i,
+                   Document = j
+               });
+
             if (pageInfo != null)
             {
-                query = query.Skip((pageInfo.Page - 1) * pageInfo.PageSize)
+                queryableCategory = queryableCategory
+                    .Skip((pageInfo.Page - 1) * pageInfo.PageSize)
                     .Take(pageInfo.PageSize);
             }
-            return query
-                .OrderByDescending(i => i.IsActive)
-                .ThenByDescending(i => i.CreatedDate)
-                .Join(_documentRepository.GetQueryable(), i => i.DocumentGuid, j => j.Guid, (i, j) => new CategoryInfo
-                {
-                    Category = i,
-                    Document = j
-                });
+            return queryableCategory;
         }
     }
 }
