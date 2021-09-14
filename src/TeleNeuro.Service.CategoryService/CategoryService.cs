@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using PlayCore.Core.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService.Models;
@@ -26,10 +27,19 @@ namespace TeleNeuro.Service.CategoryService
         /// Returns Categories
         /// </summary>
         /// <returns></returns>
-        public async Task<List<CategoryInfo>> ListCategories()
+        public async Task<List<CategoryInfo>> ListCategories(PageInfo pageInfo = null)
+        {
+            return await GetQueryableCategory(pageInfo: pageInfo)
+                .ToListAsync();
+        }
+        /// <summary>
+        /// Returns Categories count
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> CountCategories()
         {
             return await GetQueryableCategory()
-                .ToListAsync();
+                .CountAsync();
         }
         /// <summary>
         /// Return Category
@@ -105,14 +115,18 @@ namespace TeleNeuro.Service.CategoryService
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        private IQueryable<CategoryInfo> GetQueryableCategory(Expression<Func<Category, bool>> expression = null)
+        private IQueryable<CategoryInfo> GetQueryableCategory(Expression<Func<Category, bool>> expression = null, PageInfo pageInfo = null)
         {
             var query = _categoryRepository.GetQueryable().AsQueryable();
             if (expression != null)
             {
                 query = query.Where(expression);
             }
-
+            if (pageInfo != null)
+            {
+                query = query.Skip((pageInfo.Page - 1) * pageInfo.PageSize)
+                    .Take(pageInfo.PageSize);
+            }
             return query
                 .OrderByDescending(i => i.IsActive)
                 .ThenByDescending(i => i.CreatedDate)

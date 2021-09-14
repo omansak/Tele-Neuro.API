@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,16 +11,8 @@ using PlayCore.Core.Extension;
 using Service.Document.Image.ImageSharp;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
-using System.Diagnostics;
 using System.IO;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Service.Document.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService;
@@ -108,8 +101,7 @@ namespace TeleNeuro.API
             {
                 OnPrepareResponse = ctx => {
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-                    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers",
-                        "Origin, X-Requested-With, Content-Type, Accept");
+                    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                 },
             });
 

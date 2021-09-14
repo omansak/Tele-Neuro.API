@@ -26,17 +26,17 @@ namespace PlayCore.Core.Extension
         }
         public static BaseResponse SetTotalCount(this BaseResponse baseResponse, int count)
         {
-            baseResponse.Result.TotalCount = count;
+            baseResponse.Result.PageInfo.TotalCount = count;
             return baseResponse;
         }
         public static BaseResponse SetPage(this BaseResponse baseResponse, int? page)
         {
-            baseResponse.Result.Page = page ?? 1;
+            baseResponse.Result.PageInfo.Page = page ?? 1;
             return baseResponse;
         }
         public static BaseResponse SetPageSize(this BaseResponse baseResponse, int? pageSize)
         {
-            baseResponse.Result.PageSize = pageSize ?? 1;
+            baseResponse.Result.PageInfo.PageSize = pageSize ?? 1;
             return baseResponse;
         }
     }
