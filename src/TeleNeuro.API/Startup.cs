@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,15 +12,18 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
 using System.Data.Common;
 using System.IO;
+using Service.Document.DocumentServiceSelector;
+using Service.Document.Video.Vimeo;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService;
+using TeleNeuro.Service.ExerciseService;
+using VimeoDotNet.Exceptions;
 
 namespace TeleNeuro.API
 {
     public class Startup
     {
-
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment WebHostEnvironment { get; }
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
@@ -50,6 +52,7 @@ namespace TeleNeuro.API
             services.AddDbContext<TeleNeuroDatabaseContext>(options => options.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=TeleNeuro;"));
             //Dependencies
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IExerciseService, ExerciseService>();
             services.AddScoped<Service.DocumentService.IDocumentService, Service.DocumentService.DocumentService>();
             services
                 .AddDocumentImageService(new DocumentImageServiceOptions
@@ -82,6 +85,33 @@ namespace TeleNeuro.API
                     };
                 });
 
+            services
+                .AddDocumentVideoService(new DocumentVideoServiceOptions
+                {
+                    Token = Configuration["Credential:VimeoToken"]
+                })
+                .Configure<Service.DocumentService.IDocumentService>((i, j) =>
+                {
+                    i.CompletedAction = (result) =>
+                    {
+                        j.InsertDocument(new Document
+                        {
+                            Guid = result.Guid,
+                            Name = result.Name,
+                            FileName = result.FileName,
+                            Extension = result.Extension,
+                            ContentType = result.ContentType,
+                            Directory = result.DocumentPath.Directory,
+                            Path = result.DocumentPath.Path,
+                            HostBase = result.DocumentPath.Base,
+                            HostFullPath = result.DocumentPath.FullPath,
+                            Type = (int)result.Type,
+                            CreatedDate = result.CreatedDate,
+                            IsActive = true
+                        }).GetAwaiter().GetResult();
+                    };
+                });
+            services.AddScoped<IDocumentServiceSelector, DocumentServiceSelector>();
             // MVC
             services.AddControllers();
             services.AddMvcCore();
@@ -99,7 +129,8 @@ namespace TeleNeuro.API
             app.UseImageSharp();
             app.UseStaticFiles(new StaticFileOptions
             {
-                OnPrepareResponse = ctx => {
+                OnPrepareResponse = ctx =>
+                {
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                 },
@@ -111,7 +142,12 @@ namespace TeleNeuro.API
                 if (i is SixLabors.ImageSharp.ImageProcessingException || i is SixLabors.ImageSharp.ImageFormatException)
                 {
                     string guid = Guid.NewGuid().ToString();
-                    return new Exception($"Döküman yüklerken bir hata meydana geldi.\n\nGUID : {guid}", i);
+                    return new Exception($"Döküman yüklerken bir hata meydana geldi (IMAGE).\n\nGUID : {guid}", i);
+                }
+                if (i is VimeoApiException)
+                {
+                    string guid = Guid.NewGuid().ToString();
+                    return new Exception($"Döküman yüklerken bir hata meydana geldi (VIDEO).\n\nGUID : {guid}", i);
                 }
                 if (i is DbException)
                 {

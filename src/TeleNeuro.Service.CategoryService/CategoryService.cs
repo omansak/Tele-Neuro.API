@@ -77,7 +77,7 @@ namespace TeleNeuro.Service.CategoryService
             }
             else
             {
-                if (string.IsNullOrWhiteSpace(category.DocumentGuid))
+                if (!string.IsNullOrWhiteSpace(category.DocumentGuid))
                 {
                     category.CreatedDate = System.DateTime.Now;
                     var result = await _categoryRepository.InsertAsync(new Category

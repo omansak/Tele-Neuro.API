@@ -5,10 +5,10 @@ namespace Service.Document.Image.ImageSharp
 {
     public interface IDocumentImageService : IDocumentService
     {
-        IDocumentImageService SetBaseFolder(string baseFolder);
-        IDocumentImageService SetDirectory(string directory);
-        IDocumentImageService SetQuality(int quality);
-        IDocumentImageService SetSaveFormat(ImageFormat format);
-        IDocumentImageService SetCompletedAction(Action<DocumentResult> completedAction);
+        DocumentImageService SetBaseFolder(string baseFolder);
+        DocumentImageService SetDirectory(string directory);
+        DocumentImageService SetQuality(int quality);
+        DocumentImageService SetSaveFormat(ImageFormat format);
+        DocumentImageService SetCompletedAction(Action<DocumentResult> completedAction);
     }
 }

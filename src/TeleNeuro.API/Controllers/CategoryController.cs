@@ -6,6 +6,8 @@ using Service.Document.Image.ImageSharp;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PlayCore.Core.CustomException;
+using Service.Document.DocumentServiceSelector;
+using Service.Document.Model;
 using TeleNeuro.API.Models;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.CategoryService;
@@ -17,12 +19,12 @@ namespace TeleNeuro.API.Controllers
     public class CategoryController
     {
         private readonly ICategoryService _categoryService;
-        private readonly IDocumentImageService _documentImageService;
+        private readonly IDocumentServiceSelector _documentServiceSelector;
 
-        public CategoryController(ICategoryService categoryService, IDocumentImageService documentImageService)
+        public CategoryController(ICategoryService categoryService, IDocumentServiceSelector documentServiceSelector)
         {
             _categoryService = categoryService;
-            _documentImageService = documentImageService;
+            _documentServiceSelector = documentServiceSelector;
         }
         [HttpPost]
         public async Task<BaseResponse> ListCategories(PageInfo pageInfo)
@@ -36,13 +38,19 @@ namespace TeleNeuro.API.Controllers
         [HttpPost]
         public async Task<BaseResponse> UpdateCategory([FromForm] CategoryModel model)
         {
+            DocumentResult documentResult = null;
+            if (model.Image != null)
+            {
+                documentResult = await _documentServiceSelector.GetService(model.Image, new[] { DocumentType.Image }).SaveAsync(model.Image.OpenReadStream(), model.Image.FileName, model.Image.ContentType);
+            }
+
             return new BaseResponse().SetResult(await _categoryService.UpdateCategory(new Category
             {
                 Id = model.Id,
                 Name = model.Name,
                 Description = model.Description,
                 IsActive = model.IsActive,
-                DocumentGuid = model.Image != null ? (await _documentImageService.SaveAsync(model.Image.OpenReadStream())).Guid : null
+                DocumentGuid = documentResult?.Guid
             }));
         }
         [HttpPost]

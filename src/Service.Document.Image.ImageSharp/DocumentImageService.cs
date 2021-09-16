@@ -2,7 +2,6 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
 using System;
 using System.IO;
 using System.Linq;
@@ -28,57 +27,57 @@ namespace Service.Document.Image.ImageSharp
             CompletedAction = completedAction;
         }
 
-        public IDocumentImageService SetBaseFolder(string baseFolder)
+        public DocumentImageService SetBaseFolder(string baseFolder)
         {
             BaseFolder = baseFolder;
             return this;
         }
-        public IDocumentImageService SetDirectory(string directory)
+        public DocumentImageService SetDirectory(string directory)
         {
             Directory = directory;
             return this;
         }
-        public IDocumentImageService SetSaveFormat(ImageFormat format)
+        public DocumentImageService SetSaveFormat(ImageFormat format)
         {
             SaveFormat = format;
             return this;
         }
-        public IDocumentImageService SetCompletedAction(Action<DocumentResult> completedAction)
+        public DocumentImageService SetCompletedAction(Action<DocumentResult> completedAction)
         {
             CompletedAction = completedAction;
             return this;
         }
-        public IDocumentImageService SetQuality(int quality)
+        public DocumentImageService SetQuality(int quality)
         {
             Quality = quality;
             return this;
         }
-        public async Task<DocumentResult> SaveAsync(string filePath, string fileName = null, Action<DocumentResult> completed = null)
+        public async Task<DocumentResult> SaveAsync(string filePath, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
             using (var stream = new StreamReader(filePath))
             {
-                return await UploadAsync(stream.BaseStream, fileName, completed);
+                return await UploadAsync(stream.BaseStream, fileName, mimeType, completed);
             }
         }
-        public async Task<DocumentResult> SaveAsync(byte[] data, string fileName = null, Action<DocumentResult> completed = null)
+        public async Task<DocumentResult> SaveAsync(byte[] data, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
             using (var stream = new MemoryStream(data))
             {
-                return await UploadAsync(stream, fileName, completed);
+                return await UploadAsync(stream, fileName, mimeType, completed);
             }
         }
-        public async Task<DocumentResult> SaveAsync(Stream stream, string fileName = null, Action<DocumentResult> completed = null)
+        public async Task<DocumentResult> SaveAsync(Stream stream, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
-            return await UploadAsync(stream, fileName, completed);
+            return await UploadAsync(stream, fileName, mimeType, completed);
         }
-        public async Task<DocumentResult> SaveAsync(Uri uri, string fileName = null, Action<DocumentResult> completed = null)
+        public async Task<DocumentResult> SaveAsync(Uri uri, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
             using (var wc = new System.Net.WebClient())
             {
-                return await SaveAsync(wc.DownloadData(uri.AbsoluteUri), fileName, completed);
+                return await SaveAsync(wc.DownloadData(uri.AbsoluteUri), fileName, mimeType, completed);
             }
         }
-        private async Task<DocumentResult> UploadAsync(Stream stream, string fileName = null, Action<DocumentResult> completed = null)
+        private async Task<DocumentResult> UploadAsync(Stream stream, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
             using (var image = SixLabors.ImageSharp.Image.Load(Configuration.Default, stream, out IImageFormat format))
             {

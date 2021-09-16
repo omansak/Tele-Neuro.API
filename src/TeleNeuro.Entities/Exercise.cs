@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TeleNeuro.Entities
 {
-    [Table("CATEGORY")]
-    public class Category
+    [Table("EXERCISE")]
+    public class Exercise
     {
         [Key]
         [Column("ID")]

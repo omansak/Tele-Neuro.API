@@ -22,10 +22,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PlayCore.Core\PlayCore.Core.csproj" />
+    <ProjectReference Include="..\Service.Document.DocumentServiceSelector\Service.Document.DocumentServiceSelector.csproj" />
     <ProjectReference Include="..\Service.Document.Image.ImageSharp\Service.Document.Image.ImageSharp.csproj" />
+    <ProjectReference Include="..\Service.Document.Video.Vimeo\Service.Document.Video.Vimeo.csproj" />
     <ProjectReference Include="..\TeleNeuro.Entity.Context\TeleNeuro.Entity.Context.csproj" />
     <ProjectReference Include="..\TeleNeuro.Service.CategoryService\TeleNeuro.Service.CategoryService.csproj" />
     <ProjectReference Include="..\TeleNeuro.Service.DocumentService\TeleNeuro.Service.DocumentService.csproj" />
+    <ProjectReference Include="..\TeleNeuro.Service.ExerciseService\TeleNeuro.Service.ExerciseService.csproj" />
   </ItemGroup>
 
 </Project>

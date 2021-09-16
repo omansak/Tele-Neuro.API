@@ -1,78 +1,103 @@
-﻿using PlayCore.Core.CustomException;
-using PlayCore.Core.Extension;
-using PlayCore.Core.Logger;
+﻿using Service.Document.Model;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using VimeoDotNet;
+using VimeoDotNet.Enums;
+using VimeoDotNet.Exceptions;
+using VimeoDotNet.Models;
 using VimeoDotNet.Net;
 
 namespace Service.Document.Video.Vimeo
 {
     public class DocumentVideoService : IDocumentVideoService
     {
+        public Action<DocumentResult> CompletedAction { get; private set; }
         private readonly VimeoClient _client;
-        private readonly IBasicLogger<DocumentVideoService> _basicLogger;
 
-        public DocumentVideoService(string token, IBasicLogger<DocumentVideoService> basicLogger)
+        public DocumentVideoService(string token, Action<DocumentResult> completedAction = null)
         {
-            _basicLogger = basicLogger;
+            if (string.IsNullOrWhiteSpace(token))
+                throw new ArgumentNullException(nameof(token));
+            CompletedAction = completedAction;
             _client ??= new VimeoClient(token);
         }
-        public async Task<Video> UploadAsync(string filePath)
+        public DocumentVideoService SetCompletedAction(Action<DocumentResult> completedAction)
         {
-            return await UploadAsync(new BinaryContent(filePath));
+            CompletedAction = completedAction;
+            return this;
         }
-        public async Task<Video> UploadAsync(byte[] data, string contentType)
+        public async Task<DocumentResult> SaveAsync(string filePath, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
-            return await UploadAsync(new BinaryContent(data, contentType));
+            return await UploadAsync(new BinaryContent(filePath), fileName, completed);
         }
-        public async Task<Video> UploadAsync(Stream stream, string contentType)
-        {
-            return await UploadAsync(new BinaryContent(stream, contentType));
-        }
-        public async Task<Video> UploadAsync(Uri uri)
-        {
-            try
-            {
-                var result = await _client.UploadPullLinkAsync(uri.AbsoluteUri);
-                if (result?.Id.HasValue == true)
-                    return new Video
-                    {
-                        Id = result.Id.Value,
-                        Name = result.Name,
-                        Url = result.Uri
-                    };
-            }
-            catch (Exception e)
-            {
-                _basicLogger.Log(e.ToJson());
-            }
 
-            throw new UIException("Dosya Yüklenemedi");
-        }
-        private async Task<Video> UploadAsync(BinaryContent binaryContent)
+        public async Task<DocumentResult> SaveAsync(byte[] data, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
         {
-            try
+            return await UploadAsync(new BinaryContent(data, mimeType), fileName, completed);
+        }
+
+        public async Task<DocumentResult> SaveAsync(Stream stream, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
+        {
+            return await UploadAsync(new BinaryContent(stream, mimeType), fileName, completed);
+        }
+
+        public async Task<DocumentResult> SaveAsync(Uri uri, string fileName = null, string mimeType = null, Action<DocumentResult> completed = null)
+        {
+            using (var wc = new System.Net.WebClient())
             {
-                using (var file = binaryContent)
+                return await UploadAsync(new BinaryContent(wc.DownloadData(uri.AbsoluteUri), mimeType), fileName, completed);
+            }
+        }
+
+        private async Task<DocumentResult> UploadAsync(BinaryContent binaryContent, string fileName = null, Action<DocumentResult> completed = null)
+        {
+            using (var file = binaryContent)
+            {
+                file.OriginalFileName = fileName;
+                var result = await _client.UploadEntireFileAsync(file);
+                if (result.IsVerifiedComplete && result.ClipId.HasValue)
                 {
-                    var result = await _client.UploadEntireFileAsync(file);
-                    if (result.IsVerifiedComplete && result.ClipId.HasValue)
-                        return new Video
+                    var video = await _client.GetVideoAsync(result.ClipId.Value);
+                    await _client.UpdateVideoMetadataAsync(result.ClipId.Value, new VideoUpdateMetadata
+                    {
+                        EmbedPrivacy = VideoEmbedPrivacyEnum.Public,
+                        AllowDownloadVideo = false,
+                        Name = fileName,
+                        Privacy = VideoPrivacyEnum.Disable
+                    });
+                    var documentResult = new DocumentResult
+                    {
+                        Guid = result.ClipId.Value.ToString(),
+                        Name = $"{video.Name}.{MimeTypeAssistant.GetExtension(result.File.ContentType)}",
+                        FileName = fileName ?? $"{video.Name}.{MimeTypeAssistant.GetExtension(result.File.ContentType)}",
+                        Extension = MimeTypeAssistant.GetExtension(result.File.ContentType),
+                        ContentType = result.File.ContentType,
+                        Type = DocumentType.Video,
+                        DocumentPath = new DocumentPath
                         {
-                            Id = result.ClipId.Value,
-                            Name = result.Ticket.Video.Name,
-                            Url = result.ClipUri
-                        };
-                }
-            }
-            catch (Exception e)
-            {
-                _basicLogger.Log(e.ToJson());
-            }
+                            Base = "https://player.vimeo.com/",
+                            Directory = "video",
+                            Path = $"video/{result.ClipId.Value}",
+                            FullPath = $"https://player.vimeo.com/video/{result.ClipId.Value}"
+                        },
+                        CreatedDate = DateTime.Now
+                    };
+                    if (completed != null)
+                    {
+                        completed(documentResult);
+                    }
 
-            throw new UIException("Dosya Yüklenemedi");
+                    if (CompletedAction != null)
+                    {
+                        CompletedAction(documentResult);
+                    }
+
+                    return documentResult;
+                }
+                throw new VimeoApiException("Video did not upload");
+            }
         }
+
     }
 }
