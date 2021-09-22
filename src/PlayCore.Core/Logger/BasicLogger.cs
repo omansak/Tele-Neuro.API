@@ -2,14 +2,15 @@
 using PlayCore.Core.Extension;
 using System;
 using System.IO;
+using System.Threading;
 
 namespace PlayCore.Core.Logger
 {
     public class BasicLogger<TCategory> : IBasicLogger<TCategory> where TCategory : class
     {
         private readonly BasicLoggerConfiguration _configuration;
-        private string _path => _configuration.Directory + "/" + _configuration.FileName + "." + _configuration.Extension;
-
+        private string Path => _configuration.Directory + "/" + _configuration.FileName + "." + _configuration.Extension;
+        private static readonly ReaderWriterLockSlim ReadWriteLock = new();
         public BasicLogger(BasicLoggerConfiguration configuration)
         {
             _configuration = configuration;
@@ -21,9 +22,17 @@ namespace PlayCore.Core.Logger
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            using (TextWriter textWriter = TextWriter.Synchronized(File.AppendText(_path)))
+            ReadWriteLock.EnterWriteLock();
+            try
             {
-                textWriter.WriteLine($"[{DateTime.Now}] [{logLevel}] [{typeof(TCategory).Name}] : {formatter(state, exception)}");
+                using (TextWriter textWriter = TextWriter.Synchronized(File.AppendText(Path)))
+                {
+                    textWriter.WriteLine($"[{DateTime.Now}] [{logLevel}] [{typeof(TCategory).Name}] : {formatter(state, exception)}");
+                }
+            }
+            finally
+            {
+                ReadWriteLock.ExitWriteLock();
             }
         }
         public void Log(string message)

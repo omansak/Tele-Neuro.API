@@ -23,6 +23,7 @@ namespace TeleNeuro.Entity.Context
             builder.Entity<Category>();
             builder.Entity<Document>();
             builder.Entity<Exercise>();
+            builder.Entity<Program>();
         }
     }
 }

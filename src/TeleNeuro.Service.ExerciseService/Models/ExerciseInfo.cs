@@ -6,6 +6,5 @@ namespace TeleNeuro.Service.ExerciseService.Models
     {
         public Exercise Exercise { get; set; }
         public Document Document { get; set; }
-        public int ProgramCount { get; set; }
     }
 }

@@ -42,7 +42,7 @@ namespace TeleNeuro.Service.CategoryService
                 .CountAsync();
         }
         /// <summary>
-        /// Return Category
+        /// Returns CategoryInfo
         /// </summary>
         /// <param name="id">Category's Id</param>
         /// <returns></returns>
@@ -111,7 +111,7 @@ namespace TeleNeuro.Service.CategoryService
             throw new UIException("Kategori bulunamadi");
         }
         /// <summary>
-        /// Return CategoryInfo Queryable
+        /// Returns CategoryInfo Queryable
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
@@ -132,7 +132,7 @@ namespace TeleNeuro.Service.CategoryService
                    Document = j
                });
 
-            if (pageInfo != null)
+            if (pageInfo != null && pageInfo.Page > -1 && pageInfo.PageSize > 0)
             {
                 queryableCategory = queryableCategory
                     .Skip((pageInfo.Page - 1) * pageInfo.PageSize)

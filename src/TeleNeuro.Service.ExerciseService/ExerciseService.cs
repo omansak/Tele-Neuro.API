@@ -77,20 +77,16 @@ namespace TeleNeuro.Service.ExerciseService
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(exercise.DocumentGuid))
+                exercise.CreatedDate = System.DateTime.Now;
+                var result = await _exerciseRepository.InsertAsync(new Exercise
                 {
-                    exercise.CreatedDate = System.DateTime.Now;
-                    var result = await _exerciseRepository.InsertAsync(new Exercise
-                    {
-                        Name = exercise.Name,
-                        Description = exercise.Description,
-                        IsActive = true,
-                        CreatedDate = System.DateTime.Now,
-                        DocumentGuid = exercise.DocumentGuid
-                    });
-                    return await GetExercise(result.Id);
-                }
-                throw new UIException("Egzersiz yayın içeriği bulunamadı.");
+                    Name = exercise.Name,
+                    Description = exercise.Description,
+                    IsActive = true,
+                    CreatedDate = System.DateTime.Now,
+                    DocumentGuid = exercise.DocumentGuid
+                });
+                return await GetExercise(result.Id);
             }
         }
         /// <summary>
@@ -123,13 +119,18 @@ namespace TeleNeuro.Service.ExerciseService
             }
 
             var queryableCategory = query
-               .OrderByDescending(i => i.IsActive)
-               .ThenByDescending(i => i.CreatedDate)
-               .Join(_documentRepository.GetQueryable(), i => i.DocumentGuid, j => j.Guid, (i, j) => new ExerciseInfo
-               {
-                   Exercise = i,
-                   Document = j
-               });
+                .OrderByDescending(i => i.IsActive)
+                .ThenByDescending(i => i.CreatedDate)
+                .GroupJoin(_documentRepository.GetQueryable(), i => i.DocumentGuid, j => j.Guid, (i, j) => new
+                {
+                    Exercise = i,
+                    Document = j
+                })
+                .SelectMany(i => i.Document.DefaultIfEmpty(), (i, j) => new ExerciseInfo
+                {
+                    Exercise = i.Exercise,
+                    Document = j
+                });
 
             if (pageInfo != null)
             {

@@ -1,4 +1,5 @@
 
+using System;
 using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
@@ -6,6 +7,8 @@ using Service.Document.Image.ImageSharp;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PlayCore.Core.CustomException;
+using PlayCore.Core.HostedService;
+using PlayCore.Core.Logger;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Model;
 using TeleNeuro.API.Models;

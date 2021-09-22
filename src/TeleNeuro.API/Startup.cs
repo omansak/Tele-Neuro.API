@@ -12,6 +12,9 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
 using System.Data.Common;
 using System.IO;
+using System.Threading.Tasks;
+using PlayCore.Core.HostedService;
+using PlayCore.Core.Logger;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Video.Vimeo;
 using TeleNeuro.Entities;
@@ -112,6 +115,12 @@ namespace TeleNeuro.API
                     };
                 });
             services.AddScoped<IDocumentServiceSelector, DocumentServiceSelector>();
+            // Loggers
+            services.AddBasicLogger();
+            services.AddSpecificBasicLogger<QueuedHostedService>(nameof(QueuedHostedService));
+            // BackgroundService
+            services.AddHostedService<QueuedHostedService>();
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             // MVC
             services.AddControllers();
             services.AddMvcCore();
