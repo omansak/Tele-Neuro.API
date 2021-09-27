@@ -8,6 +8,7 @@ namespace TeleNeuro.Service.ExerciseService
 {
     public interface IExerciseService
     {
+        Task<List<ExerciseInfo>> SearchExercises(string term);
         Task<List<ExerciseInfo>> ListExercises(PageInfo pageInfo = null);
         Task<int> CountExercises();
         Task<ExerciseInfo> GetExercise(int id);

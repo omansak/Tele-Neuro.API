@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PlayCore.Core.CustomException;
+using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
 using PlayCore.Core.Repository;
 using TeleNeuro.Entities;
@@ -17,11 +18,13 @@ namespace TeleNeuro.Service.ProgramService
     {
         private readonly IBaseRepository<Program, TeleNeuroDatabaseContext> _programRepository;
         private readonly IBaseRepository<Category, TeleNeuroDatabaseContext> _categoryRepository;
+        private readonly IBaseRepository<TeleNeuroDatabaseContext> _baseRepository;
 
-        public ProgramService(IBaseRepository<Program, TeleNeuroDatabaseContext> programRepository, IBaseRepository<Category, TeleNeuroDatabaseContext> categoryRepository)
+        public ProgramService(IBaseRepository<Program, TeleNeuroDatabaseContext> programRepository, IBaseRepository<Category, TeleNeuroDatabaseContext> categoryRepository, IBaseRepository<TeleNeuroDatabaseContext> baseRepository)
         {
             _programRepository = programRepository;
             _categoryRepository = categoryRepository;
+            _baseRepository = baseRepository;
         }
         /// <summary>
         /// Returns ProgramInfo
@@ -59,6 +62,9 @@ namespace TeleNeuro.Service.ProgramService
         /// <returns></returns>
         public async Task<ProgramInfo> UpdateProgram(Program program)
         {
+            if (program.CategoryId <= 0)
+                throw new UIException("Kategori bulunamadi");
+
             if (program.Id > 0)
             {
                 var programRow = await _programRepository.FindOrDefaultAsync(i => i.Id == program.Id);
@@ -104,7 +110,55 @@ namespace TeleNeuro.Service.ProgramService
                 return true;
             }
 
-            throw new UIException("Program bulunamadi");
+            throw new UIException("Program bulunamadı");
+        }
+        /// <summary>
+        /// Assign Exercise to Program
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>Assign's Id</returns>
+        public async Task<int> AssignExercise(AssignExerciseModel model)
+        {
+            if (!await _programRepository.AnyAsync(i => i.IsActive && i.Id == model.ProgramId))
+                throw new UIException("Program bulunamadı");
+
+            if (!await _baseRepository.AnyAsync<Exercise>(i => i.IsActive && i.Id == model.ExerciseId))
+                throw new UIException("Egzersiz bulunamadı");
+
+            var exerciseProgramRelational = await _baseRepository.InsertAsync(new ExerciseProgramRelation
+            {
+                ProgramId = model.ProgramId,
+                ExerciseId = model.ExerciseId,
+                CreatedDate = DateTime.Now,
+                AutoSkip = model.AutoSkip,
+                AutoSkipTime = model.AutoSkipTime,
+                CreatedUser = model.UserId
+            });
+
+            if (exerciseProgramRelational?.Id > 0)
+            {
+                if (model.Properties?.Count > 0)
+                {
+                    foreach (var item in model.Properties)
+                    {
+                        if (item.Id > 0 & !string.IsNullOrWhiteSpace(item.Value))
+                        {
+                            await _baseRepository.InsertAsync(
+                                new ExerciseProgramRelationProperty
+                                {
+                                    ExerciseRelationId = exerciseProgramRelational.Id,
+                                    ExercisePropertyId = item.Id,
+                                    Value = item.Value,
+                                    CreatedDate = DateTime.Now,
+                                    CreatedUser = model.UserId
+                                });
+                        }
+                    }
+                }
+
+                return exerciseProgramRelational.Id;
+            }
+            throw new UIException("Egzersiz atanamadı");
         }
         /// <summary>
         /// Return ProgramInfo Queryable

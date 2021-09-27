@@ -33,6 +33,24 @@ namespace TeleNeuro.Service.CategoryService
                 .ToListAsync();
         }
         /// <summary>
+        /// Returns Active Categories
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<CategoryInfo>> ListActiveCategories(PageInfo pageInfo = null)
+        {
+            return await GetQueryableCategory(i => i.IsActive, pageInfo: pageInfo)
+                .ToListAsync();
+        }
+        /// <summary>
+        /// Returns Active Categories count
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> CountActiveCategories()
+        {
+            return await GetQueryableCategory(i => i.IsActive)
+                .CountAsync();
+        }
+        /// <summary>
         /// Returns Categories count
         /// </summary>
         /// <returns></returns>

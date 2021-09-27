@@ -8,6 +8,8 @@ namespace TeleNeuro.Service.CategoryService
 {
     public interface ICategoryService
     {
+        Task<List<CategoryInfo>> ListActiveCategories(PageInfo pageInfo = null);
+        Task<int> CountActiveCategories();
         Task<List<CategoryInfo>> ListCategories(PageInfo pageInfo = null);
         Task<int> CountCategories();
         Task<CategoryInfo> GetCategory(int id);

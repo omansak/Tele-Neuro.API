@@ -13,5 +13,6 @@ namespace TeleNeuro.Service.ProgramService
         Task<ProgramInfo> GetProgram(int id);
         Task<ProgramInfo> UpdateProgram(Program program);
         Task<bool> ToggleProgramStatus(int programId);
+        Task<int> AssignExercise(AssignExerciseModel model);
     }
 }

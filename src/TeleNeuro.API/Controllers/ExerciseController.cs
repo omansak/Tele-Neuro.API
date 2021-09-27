@@ -30,6 +30,12 @@ namespace TeleNeuro.API.Controllers
             _serviceScopeFactory = serviceScopeFactory;
         }
         [HttpPost]
+        public async Task<BaseResponse> SearchExercises(SearchTermModel model)
+        {
+            return new BaseResponse()
+                .SetResult(await _exerciseService.SearchExercises(model.SearchTerm));
+        }
+        [HttpPost]
         public async Task<BaseResponse> ListExercises(PageInfo pageInfo)
         {
             return new BaseResponse()

@@ -21,6 +21,8 @@ using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService;
 using TeleNeuro.Service.ExerciseService;
+using TeleNeuro.Service.ProgramService;
+using TeleNeuro.Service.UtilityService;
 using VimeoDotNet.Exceptions;
 
 namespace TeleNeuro.API
@@ -56,6 +58,8 @@ namespace TeleNeuro.API
             //Dependencies
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IExerciseService, ExerciseService>();
+            services.AddScoped<IProgramService, ProgramService>();
+            services.AddScoped<IUtilityService, UtilityService>();
             services.AddScoped<Service.DocumentService.IDocumentService, Service.DocumentService.DocumentService>();
             services
                 .AddDocumentImageService(new DocumentImageServiceOptions

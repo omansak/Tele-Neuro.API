@@ -24,6 +24,16 @@ namespace TeleNeuro.Service.ExerciseService
             _documentRepository = documentRepository;
         }
         /// <summary>
+        /// Search Exercises
+        /// </summary>
+        /// <param name="term"></param>
+        /// <returns></returns>
+        public async Task<List<ExerciseInfo>> SearchExercises(string term)
+        {
+            return await GetQueryableExercise(i => i.Name.Contains(term) || i.Description.Contains(term))
+                .ToListAsync();
+        }
+        /// <summary>
         /// Returns Exercises
         /// </summary>
         /// <returns></returns>
