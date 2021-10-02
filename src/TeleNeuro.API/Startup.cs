@@ -54,7 +54,7 @@ namespace TeleNeuro.API
             services.AddBaseRepository();
             services.AddBaseEntityRepository();
             //Context
-            services.AddDbContext<TeleNeuroDatabaseContext>(options => options.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=TeleNeuro;"));
+            services.AddDbContext<TeleNeuroDatabaseContext>(options => options.UseSqlServer(Configuration["Credential:ConnectionString"]));
             //Dependencies
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IExerciseService, ExerciseService>();

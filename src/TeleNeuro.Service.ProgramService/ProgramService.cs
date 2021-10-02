@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using PlayCore.Core.CustomException;
+using PlayCore.Core.Model;
+using PlayCore.Core.Repository;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using PlayCore.Core.CustomException;
-using PlayCore.Core.Extension;
-using PlayCore.Core.Model;
-using PlayCore.Core.Repository;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.ProgramService.Models;
@@ -125,6 +125,12 @@ namespace TeleNeuro.Service.ProgramService
             if (!await _baseRepository.AnyAsync<Exercise>(i => i.IsActive && i.Id == model.ExerciseId))
                 throw new UIException("Egzersiz bulunamadı");
 
+            int index = await _baseRepository.GetQueryable<ExerciseProgramRelation>()
+                .Where(i => i.ProgramId == model.ProgramId)
+                .Select(i => i.Sequence)
+                .DefaultIfEmpty()
+                .MaxAsync();
+
             var exerciseProgramRelational = await _baseRepository.InsertAsync(new ExerciseProgramRelation
             {
                 ProgramId = model.ProgramId,
@@ -132,6 +138,7 @@ namespace TeleNeuro.Service.ProgramService
                 CreatedDate = DateTime.Now,
                 AutoSkip = model.AutoSkip,
                 AutoSkipTime = model.AutoSkipTime,
+                Sequence = index + 1,
                 CreatedUser = model.UserId
             });
 
@@ -159,6 +166,132 @@ namespace TeleNeuro.Service.ProgramService
                 return exerciseProgramRelational.Id;
             }
             throw new UIException("Egzersiz atanamadı");
+        }
+        /// <summary>
+        /// Return Exercises of Program
+        /// </summary>
+        public async Task<List<ProgramAssignedExerciseInfo>> AssignedExercises(int programId)
+        {
+            // TODO user related
+            var programRow = await _programRepository.FindOrDefaultAsync(i => i.Id == programId);
+            if (programRow != null)
+            {
+                return _baseRepository.GetQueryable<ExerciseProgramRelation>()
+                       .Where(i => i.ProgramId == programRow.Id)
+                       .Join(_baseRepository.GetQueryable<Exercise>(), i => i.ExerciseId, j => j.Id, (i, j) => new
+                       {
+                           Exercise = j,
+                           ProgramRelation = i
+                       })
+                       .GroupJoin(_baseRepository.GetQueryable<ExerciseProgramRelationProperty>(),
+                           i => i.ProgramRelation.Id,
+                           j => j.ExerciseRelationId, (i, j) => new
+                           {
+                               Exercise = i.Exercise,
+                               Relation = i.ProgramRelation,
+                               Properties = j
+                           })
+                       .SelectMany(i => i.Properties.DefaultIfEmpty(), (i, j) => new
+                       {
+                           Exercise = i.Exercise,
+                           Relation = i.Relation,
+                           Property = j
+                       })
+                       .GroupJoin(_baseRepository.GetQueryable<ExercisePropertyDefinition>(),
+                           i => i.Property.ExercisePropertyId, j => j.Id, (i, j) => new
+                           {
+                               Exercise = i.Exercise,
+                               Relation = i.Relation,
+                               Property = i.Property,
+                               PropertyDefinitions = j
+                           })
+                       .SelectMany(i => i.PropertyDefinitions.DefaultIfEmpty(), (i, j) => new
+                       {
+                           Exercise = i.Exercise,
+                           Relation = i.Relation,
+                           Property = i.Property,
+                           PropertyDefinition = j
+                       })
+                       .OrderBy(i => i.Relation.Sequence)
+                       .ToListAsync()
+                       .ConfigureAwait(false)
+                       .GetAwaiter()
+                       .GetResult()
+                       .GroupBy(i => new { Relation = i.Relation, Exercise = i.Exercise })
+                       .Select(i => new ProgramAssignedExerciseInfo
+                       {
+                           RelationId = i.Key.Relation.Id,
+                           ProgramId = i.Key.Relation.ProgramId,
+                           Sequence = i.Key.Relation.Sequence,
+                           AutoSkip = i.Key.Relation.AutoSkip,
+                           AutoSkipTime = i.Key.Relation.AutoSkipTime,
+                           Exercise = i.Key.Exercise,
+                           Properties = i.Where(j => j.Property != null && j.PropertyDefinition != null)
+                               .Select(j => new ExerciseProperty
+                               {
+                                   Value = j.Property.Value,
+                                   Definition = j.PropertyDefinition
+                               })
+                               .ToList()
+                       })
+                       .ToList();
+            }
+            throw new UIException("Program bulunamadı");
+        }
+        /// <summary>
+        /// Change Sequence Assigned Exercise
+        /// </summary>
+        /// <param name="relationId"></param>
+        /// <param name="direction">-1 : Up, 0 : No Change, 1 : Down</param>
+        /// <returns></returns>
+        public async Task<bool> ChangeSequenceAssignedExercise(int relationId, int direction)
+        {
+            if (direction == -1 || direction == 1)
+            {
+                var relationRow = await _baseRepository.FindOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);
+                if (relationRow != null)
+                {
+                    var relatedRelation = await _baseRepository
+                        .FindOrDefaultAsync<ExerciseProgramRelation>(i => i.ProgramId == relationRow.ProgramId && i.Sequence == relationRow.Sequence + direction);
+
+                    if (relatedRelation != null)
+                    {
+                        int temp = relatedRelation.Sequence;
+                        relatedRelation.Sequence -= direction;
+                        await _baseRepository.UpdateAsync(relatedRelation);
+
+                        relationRow.Sequence += direction;
+                        await _baseRepository.UpdateAsync(relationRow);
+                        return true;
+                    }
+                    return false;
+                }
+                throw new UIException("Egzersiz bulunamadı");
+            }
+
+            throw new UIException("Yön geçersiz");
+        }
+
+        public async Task<bool> DeleteAssignedExercise(int relationId)
+        {
+            var relationRow = await _baseRepository.FindOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);
+            if (relationRow != null)
+            {
+                await _baseRepository.DeleteAsync(relationRow);
+                int index = 1;
+                var assignedExercise = await _baseRepository.ListAsync<ExerciseProgramRelation>(i => i.ProgramId == relationRow.ProgramId);
+                if (assignedExercise != null)
+                {
+                    foreach (var item in assignedExercise)
+                    {
+                        item.Sequence = index++;
+                    }
+                    await _baseRepository.UpdateRangeAsync(assignedExercise);
+                }
+
+                return true;
+            }
+            throw new UIException("Egzersiz bulunamadı");
         }
         /// <summary>
         /// Return ProgramInfo Queryable

@@ -12,6 +12,8 @@ namespace TeleNeuro.Entities
         public int ProgramId { get; set; }
         [Column("EXERCISE_ID")]
         public int ExerciseId { get; set; }
+        [Column("SEQUENCE")]
+        public int Sequence { get; set; }
         [Column("AUTO_SKIP")]
         public bool AutoSkip { get; set; }
         [Column("AUTO_SKIP_TIME")]

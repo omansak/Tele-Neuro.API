@@ -41,14 +41,29 @@ namespace TeleNeuro.API.Controllers
             }));
         }
         [HttpPost]
-        public async Task<BaseResponse> ToggleProgramStatus(ProgramModel model)
+        public async Task<BaseResponse> ToggleProgramStatus([FromBody] int id)
         {
-            return new BaseResponse().SetResult(await _programService.ToggleProgramStatus(model.Id));
+            return new BaseResponse().SetResult(await _programService.ToggleProgramStatus(id));
         }
         [HttpPost]
         public async Task<BaseResponse> AssignExercise(AssignExerciseModel model)
         {
             return new BaseResponse().SetResult(await _programService.AssignExercise(model));
+        }
+        [HttpPost]
+        public async Task<BaseResponse> AssignedExercises([FromBody] int programId)
+        {
+            return new BaseResponse().SetResult(await _programService.AssignedExercises(programId));
+        }
+        [HttpPost]
+        public async Task<BaseResponse> ChangeSequenceAssignedExercise(ChangeSequenceModel model)
+        {
+            return new BaseResponse().SetResult(await _programService.ChangeSequenceAssignedExercise(model.Id, model.Direction));
+        }
+        [HttpPost]
+        public async Task<BaseResponse> DeleteAssignedExercise([FromBody] int relationId)
+        {
+            return new BaseResponse().SetResult(await _programService.DeleteAssignedExercise(relationId));
         }
     }
 }

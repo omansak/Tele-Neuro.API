@@ -41,7 +41,6 @@ namespace Service.Document.Model
     {
         /// <summary>
         /// Root Path
-        /// ----> /Uploads/fileName.ext
         /// --->  C://
         /// </summary>
         public string Base { get; init; }

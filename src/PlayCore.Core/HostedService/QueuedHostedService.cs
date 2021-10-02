@@ -21,8 +21,6 @@ namespace PlayCore.Core.HostedService
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _basicLogger.LogInformation("Queued Hosted Service is starting.");
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 var workItem = await TaskQueue.DequeueAsync(cancellationToken);
@@ -36,8 +34,6 @@ namespace PlayCore.Core.HostedService
                     _basicLogger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
                 }
             }
-
-            _basicLogger.LogInformation("Queued Hosted Service is stopping.");
         }
     }
 }
