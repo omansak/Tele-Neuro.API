@@ -62,6 +62,16 @@ namespace TeleNeuro.Service.ExerciseService
                 .SingleOrDefaultAsync();
         }
         /// <summary>
+        /// Return Exercise
+        /// </summary>
+        /// <param name="id">Exercise's Id</param>
+        /// <returns></returns>
+        public async Task<ExerciseInfo> GetActiveExercise(int id)
+        {
+            return await GetQueryableExercise(i => i.IsActive && i.Id == id)
+                .SingleOrDefaultAsync();
+        }
+        /// <summary>
         /// Insert or update Exercise (CreatedDate can not modify)
         /// </summary>
         /// <param name="exercise">Model</param>

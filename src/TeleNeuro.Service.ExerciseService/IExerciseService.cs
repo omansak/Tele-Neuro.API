@@ -12,6 +12,7 @@ namespace TeleNeuro.Service.ExerciseService
         Task<List<ExerciseInfo>> ListExercises(PageInfo pageInfo = null);
         Task<int> CountExercises();
         Task<ExerciseInfo> GetExercise(int id);
+        Task<ExerciseInfo> GetActiveExercise(int id);
         Task<ExerciseInfo> UpdateExercise(Exercise exercise);
         Task<bool> ToggleExerciseStatus(int categoryId);
 

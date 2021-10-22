@@ -61,10 +61,10 @@ namespace Service.Document.Video.Vimeo
                     var video = await _client.GetVideoAsync(result.ClipId.Value);
                     await _client.UpdateVideoMetadataAsync(result.ClipId.Value, new VideoUpdateMetadata
                     {
-                        EmbedPrivacy = VideoEmbedPrivacyEnum.Public,
-                        AllowDownloadVideo = false,
+                        //EmbedPrivacy = VideoEmbedPrivacyEnum.Public,
+                        //AllowDownloadVideo = false,
                         Name = fileName,
-                        Privacy = VideoPrivacyEnum.Disable
+                        //Privacy = VideoPrivacyEnum.Disable
                     });
                     var documentResult = new DocumentResult
                     {

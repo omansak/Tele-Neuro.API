@@ -55,6 +55,7 @@ namespace TeleNeuro.Service.ProgramService
             return await GetQueryableProgram(i => i.Id == id)
                 .SingleOrDefaultAsync();
         }
+
         /// <summary>
         /// Insert or update Program (CreatedDate can not modify)
         /// </summary>
@@ -170,9 +171,8 @@ namespace TeleNeuro.Service.ProgramService
         /// <summary>
         /// Return Exercises of Program
         /// </summary>
-        public async Task<List<ProgramAssignedExerciseInfo>> AssignedExercises(int programId)
+        public async Task<List<ProgramAssignedExerciseInfo>> AssignedExercises(int programId, bool? isActiveExercise = null)
         {
-            // TODO user related
             var programRow = await _programRepository.FindOrDefaultAsync(i => i.Id == programId);
             if (programRow != null)
             {
@@ -183,24 +183,40 @@ namespace TeleNeuro.Service.ProgramService
                            Exercise = j,
                            ProgramRelation = i
                        })
+                       .GroupJoin(_baseRepository.GetQueryable<Document>(), i => i.Exercise.DocumentGuid, j => j.Guid, (i, j) => new
+                       {
+                           Exercise = i.Exercise,
+                           ProgramRelation = i.ProgramRelation,
+                           ExerciseDocument = j
+                       })
+                       .SelectMany(i => i.ExerciseDocument.DefaultIfEmpty(), (i, j) => new
+                       {
+                           Exercise = i.Exercise,
+                           ProgramRelation = i.ProgramRelation,
+                           ExerciseDocument = j
+                       })
+                       .Where(i => isActiveExercise == null || i.Exercise.IsActive == isActiveExercise)
                        .GroupJoin(_baseRepository.GetQueryable<ExerciseProgramRelationProperty>(),
                            i => i.ProgramRelation.Id,
                            j => j.ExerciseRelationId, (i, j) => new
                            {
                                Exercise = i.Exercise,
                                Relation = i.ProgramRelation,
+                               ExerciseDocument = i.ExerciseDocument,
                                Properties = j
                            })
                        .SelectMany(i => i.Properties.DefaultIfEmpty(), (i, j) => new
                        {
                            Exercise = i.Exercise,
                            Relation = i.Relation,
+                           ExerciseDocument = i.ExerciseDocument,
                            Property = j
                        })
                        .GroupJoin(_baseRepository.GetQueryable<ExercisePropertyDefinition>(),
                            i => i.Property.ExercisePropertyId, j => j.Id, (i, j) => new
                            {
                                Exercise = i.Exercise,
+                               ExerciseDocument = i.ExerciseDocument,
                                Relation = i.Relation,
                                Property = i.Property,
                                PropertyDefinitions = j
@@ -208,6 +224,7 @@ namespace TeleNeuro.Service.ProgramService
                        .SelectMany(i => i.PropertyDefinitions.DefaultIfEmpty(), (i, j) => new
                        {
                            Exercise = i.Exercise,
+                           ExerciseDocument = i.ExerciseDocument,
                            Relation = i.Relation,
                            Property = i.Property,
                            PropertyDefinition = j
@@ -217,7 +234,7 @@ namespace TeleNeuro.Service.ProgramService
                        .ConfigureAwait(false)
                        .GetAwaiter()
                        .GetResult()
-                       .GroupBy(i => new { Relation = i.Relation, Exercise = i.Exercise })
+                       .GroupBy(i => new { Relation = i.Relation, Exercise = i.Exercise, ExerciseDocument = i.ExerciseDocument })
                        .Select(i => new ProgramAssignedExerciseInfo
                        {
                            RelationId = i.Key.Relation.Id,
@@ -226,6 +243,7 @@ namespace TeleNeuro.Service.ProgramService
                            AutoSkip = i.Key.Relation.AutoSkip,
                            AutoSkipTime = i.Key.Relation.AutoSkipTime,
                            Exercise = i.Key.Exercise,
+                           ExerciseDocument = i.Key.ExerciseDocument,
                            Properties = i.Where(j => j.Property != null && j.PropertyDefinition != null)
                                .Select(j => new ExerciseProperty
                                {
@@ -310,10 +328,22 @@ namespace TeleNeuro.Service.ProgramService
             var queryableProgram = query
                 .OrderByDescending(i => i.IsActive)
                 .ThenByDescending(i => i.CreatedDate)
-                .Join(_categoryRepository.GetQueryable(), i => i.CategoryId, j => j.Id, (i, j) => new ProgramInfo()
+                .Join(_categoryRepository.GetQueryable(), i => i.CategoryId, j => j.Id, (i, j) => new
                 {
                     Program = i,
                     Category = j
+                })
+                .GroupJoin(_baseRepository.GetQueryable<Document>(), i => i.Category.DocumentGuid, j => j.Guid, (i, j) => new
+                {
+                    Program = i.Program,
+                    Category = i.Category,
+                    CategoryDocument = j
+                })
+                .SelectMany(i => i.CategoryDocument.DefaultIfEmpty(), (i, j) => new ProgramInfo()
+                {
+                    Program = i.Program,
+                    Category = i.Category,
+                    CategoryDocument = j
                 });
 
             if (pageInfo != null)

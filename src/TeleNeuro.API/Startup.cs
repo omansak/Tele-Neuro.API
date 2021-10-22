@@ -33,11 +33,10 @@ namespace TeleNeuro.API
         public IWebHostEnvironment WebHostEnvironment { get; }
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
-            //Configuration = configuration;
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(webHostEnvironment.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.Development.json", optional: true, true);
+            IConfigurationBuilder builder = new ConfigurationBuilder().SetBasePath(webHostEnvironment.ContentRootPath);
+            builder = webHostEnvironment.IsDevelopment() ?
+                builder.AddJsonFile($"appsettings.Development.json", optional: true, true) :
+                builder.AddJsonFile($"appsettings.json", optional: false, true);
 
             Configuration = builder.Build();
             WebHostEnvironment = webHostEnvironment;

@@ -11,6 +11,7 @@ namespace TeleNeuro.Service.ProgramService.Models
         public bool AutoSkip { get; set; }
         public int? AutoSkipTime { get; set; }
         public Exercise Exercise { get; set; }
+        public Document ExerciseDocument { get; set; }
         public List<ExerciseProperty> Properties { get; set; }
     }
 

@@ -6,5 +6,6 @@ namespace TeleNeuro.Service.ProgramService.Models
     {
         public Program Program { get; set; }
         public Category Category { get; set; }
+        public Document CategoryDocument { get; set; }
     }
 }

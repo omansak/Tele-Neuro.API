@@ -13,6 +13,8 @@ namespace TeleNeuro.Entities
         public string Description { get; set; }
         [Column("UNIT_NAME")]
         public string UnitName { get; set; }
+        [Column("KEY")]
+        public string Key { get; set; }
         [Column("IS_NUMBER")]
         public bool IsNumber { get; set; }
     }
