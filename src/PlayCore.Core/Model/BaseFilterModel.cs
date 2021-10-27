@@ -105,21 +105,21 @@ namespace PlayCore.Core.Model
         }
         public enum OrderType
         {
-            ASC = 0, DESC = 1
+            Ascending,
+            Descending
         }
         public enum FilterType
         {
-            Contains = 0,
-            NotContains = 1,
-            Equal = 2,
-            NotEqual = 3,
-            StartsWith = 4,
-            EndWith = 5,
-            LessThan = 6,
-            LessEqualThan = 7,
-            GreaterThan = 8,
-            GreaterEqualThan = 9,
-
+            Contains,
+            NotContains,
+            Equal,
+            NotEqual,
+            StartsWith,
+            EndWith,
+            LessThan,
+            LessEqualThan,
+            GreaterThan,
+            GreaterEqualThan
         }
     }
 }

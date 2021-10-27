@@ -10,12 +10,12 @@ namespace PlayCore.Core.Extension
     {
         public static IQueryable<TEntity> ToLinqFromBaseFilter<TEntity>(this IQueryable<TEntity> query, BaseFilterModel baseFilterModel, bool includeFilters = true, bool includePaging = true)
         {
-            if (baseFilterModel.SortBy != null && baseFilterModel.SortBy.IsValid)
+            if (baseFilterModel.SortBy is {IsValid: true})
             {
                 string sortString = string.Join(",", baseFilterModel.ToQuerySortString());
                 query = query.OrderBy(sortString);
             }
-            if (includePaging && baseFilterModel.PagingBy != null && baseFilterModel.PagingBy.IsValid)
+            if (includePaging && baseFilterModel.PagingBy is {IsValid: true})
             {
                 query = query.Skip(baseFilterModel.PagingBy.Skip).Take(baseFilterModel.PagingBy.Take);
             }
@@ -130,7 +130,7 @@ namespace PlayCore.Core.Extension
             {
                 switch (baseFilterModel.SortBy.Type[i])
                 {
-                    case BaseFilterModel.OrderType.DESC:
+                    case BaseFilterModel.OrderType.Descending:
                         yield return $"{baseFilterModel.SortBy.ColumnName[i]} descending";
                         break;
                     default:

@@ -12,13 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.8">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +31,7 @@
     <ProjectReference Include="..\TeleNeuro.Service.DocumentService\TeleNeuro.Service.DocumentService.csproj" />
     <ProjectReference Include="..\TeleNeuro.Service.ExerciseService\TeleNeuro.Service.ExerciseService.csproj" />
     <ProjectReference Include="..\TeleNeuro.Service.ProgramService\TeleNeuro.Service.ProgramService.csproj" />
+    <ProjectReference Include="..\TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj" />
     <ProjectReference Include="..\TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj" />
   </ItemGroup>
 

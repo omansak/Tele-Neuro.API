@@ -68,7 +68,7 @@ namespace TeleNeuro.Service.ProgramService
 
             if (program.Id > 0)
             {
-                var programRow = await _programRepository.FindOrDefaultAsync(i => i.Id == program.Id);
+                var programRow = await _programRepository.FirstOrDefaultAsync(i => i.Id == program.Id);
                 if (programRow != null)
                 {
                     programRow.CategoryId = program.CategoryId;
@@ -103,7 +103,7 @@ namespace TeleNeuro.Service.ProgramService
         /// <returns></returns>
         public async Task<bool> ToggleProgramStatus(int programId)
         {
-            var programRow = await _programRepository.FindOrDefaultAsync(i => i.Id == programId);
+            var programRow = await _programRepository.FirstOrDefaultAsync(i => i.Id == programId);
             if (programRow != null)
             {
                 programRow.IsActive = !programRow.IsActive;
@@ -173,7 +173,7 @@ namespace TeleNeuro.Service.ProgramService
         /// </summary>
         public async Task<List<ProgramAssignedExerciseInfo>> AssignedExercises(int programId, bool? isActiveExercise = null)
         {
-            var programRow = await _programRepository.FindOrDefaultAsync(i => i.Id == programId);
+            var programRow = await _programRepository.FirstOrDefaultAsync(i => i.Id == programId);
             if (programRow != null)
             {
                 return _baseRepository.GetQueryable<ExerciseProgramRelation>()
@@ -266,11 +266,11 @@ namespace TeleNeuro.Service.ProgramService
         {
             if (direction == -1 || direction == 1)
             {
-                var relationRow = await _baseRepository.FindOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);
+                var relationRow = await _baseRepository.FirstOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);
                 if (relationRow != null)
                 {
                     var relatedRelation = await _baseRepository
-                        .FindOrDefaultAsync<ExerciseProgramRelation>(i => i.ProgramId == relationRow.ProgramId && i.Sequence == relationRow.Sequence + direction);
+                        .FirstOrDefaultAsync<ExerciseProgramRelation>(i => i.ProgramId == relationRow.ProgramId && i.Sequence == relationRow.Sequence + direction);
 
                     if (relatedRelation != null)
                     {
@@ -292,7 +292,7 @@ namespace TeleNeuro.Service.ProgramService
 
         public async Task<bool> DeleteAssignedExercise(int relationId)
         {
-            var relationRow = await _baseRepository.FindOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);
+            var relationRow = await _baseRepository.FirstOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);
             if (relationRow != null)
             {
                 await _baseRepository.DeleteAsync(relationRow);

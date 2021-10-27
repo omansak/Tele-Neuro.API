@@ -78,7 +78,7 @@ namespace TeleNeuro.Service.CategoryService
         {
             if (category.Id > 0)
             {
-                var categoryRow = await _categoryRepository.FindOrDefaultAsync(i => i.Id == category.Id);
+                var categoryRow = await _categoryRepository.FirstOrDefaultAsync(i => i.Id == category.Id);
                 if (categoryRow != null)
                 {
                     categoryRow.Name = category.Name;
@@ -118,7 +118,7 @@ namespace TeleNeuro.Service.CategoryService
         /// <returns></returns>
         public async Task<bool> ToggleCategoryStatus(int categoryId)
         {
-            var categoryRow = await _categoryRepository.FindOrDefaultAsync(i => i.Id == categoryId);
+            var categoryRow = await _categoryRepository.FirstOrDefaultAsync(i => i.Id == categoryId);
             if (categoryRow != null)
             {
                 categoryRow.IsActive = !categoryRow.IsActive;

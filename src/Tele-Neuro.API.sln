@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.ExerciseS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.ProgramService", "TeleNeuro.Service.ProgramService\TeleNeuro.Service.ProgramService.csproj", "{8A4436D4-3E81-4764-B584-CD1557964548}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleNeuro.Service.UtilityService", "TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj", "{3289496C-F458-45E2-A214-88E575D54DF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.UtilityService", "TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj", "{3289496C-F458-45E2-A214-88E575D54DF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleNeuro.Service.UserService", "TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj", "{7ADAE295-DF2B-4339-9481-B406D0D2C176}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{3289496C-F458-45E2-A214-88E575D54DF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3289496C-F458-45E2-A214-88E575D54DF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3289496C-F458-45E2-A214-88E575D54DF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,6 +115,7 @@ Global
 		{84F72150-49FA-4791-BCFE-DBC82EB94B19} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
 		{8A4436D4-3E81-4764-B584-CD1557964548} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
 		{3289496C-F458-45E2-A214-88E575D54DF2} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
+		{7ADAE295-DF2B-4339-9481-B406D0D2C176} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C2AECEFC-FBB5-40E3-9F17-F2FF1607D762}

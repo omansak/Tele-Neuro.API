@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlayCore.Core\PlayCore.Core.csproj" />
     <ProjectReference Include="..\TeleNeuro.Entity.Context\TeleNeuro.Entity.Context.csproj" />
   </ItemGroup>
 

@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
-    <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+    <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup>

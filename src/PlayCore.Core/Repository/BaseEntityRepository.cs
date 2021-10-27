@@ -1,10 +1,4 @@
-﻿#undef oracle
-#undef mssql
-#undef oracle
-#undef mysql
-#undef postgresql
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
 using System;
@@ -52,11 +46,19 @@ namespace PlayCore.Core.Repository
         {
             return await _entities.FindAsync(id);
         }
-        public async Task<TEntity> FindOrDefaultAsync(ISpecification<TEntity> filter)
+        public async Task<TEntity> FirstOrDefaultAsync(ISpecification<TEntity> filter)
         {
             return await ApplySpecification(filter).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
         }
-        public async Task<TEntity> FindOrDefaultAsync(Expression<Func<TEntity, bool>> filter)
+        public async Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> filter)
+        {
+            return await _entities.SingleOrDefaultAsync(filter, cancellationToken: _cancellationToken);
+        }
+        public async Task<TEntity> SingleOrDefaultAsync(ISpecification<TEntity> filter)
+        {
+            return await ApplySpecification(filter).SingleOrDefaultAsync(cancellationToken: _cancellationToken);
+        }
+        public async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter)
         {
             return await _entities.FirstOrDefaultAsync(filter, cancellationToken: _cancellationToken);
         }

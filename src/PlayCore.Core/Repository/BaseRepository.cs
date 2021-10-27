@@ -36,11 +36,19 @@ namespace PlayCore.Core.Repository
         {
             return await _context.Set<TEntity>().FindAsync(id);
         }
-        public async Task<TEntity> FindOrDefaultAsync<TEntity>(ISpecification<TEntity> filter) where TEntity : class
+        public async Task<TEntity> FirstOrDefaultAsync<TEntity>(ISpecification<TEntity> filter) where TEntity : class
         {
             return await ApplySpecification(filter).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
         }
-        public async Task<TEntity> FindOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public async Task<TEntity> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            return await _context.Set<TEntity>().FirstOrDefaultAsync(filter, cancellationToken: _cancellationToken);
+        }
+        public async Task<TEntity> SingleOrDefaultAsync<TEntity>(ISpecification<TEntity> filter) where TEntity : class
+        {
+            return await ApplySpecification(filter).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
+        }
+        public async Task<TEntity> SingleOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return await _context.Set<TEntity>().FirstOrDefaultAsync(filter, cancellationToken: _cancellationToken);
         }

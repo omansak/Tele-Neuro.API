@@ -80,7 +80,7 @@ namespace TeleNeuro.Service.ExerciseService
         {
             if (exercise.Id > 0)
             {
-                var exerciseRow = await _exerciseRepository.FindOrDefaultAsync(i => i.Id == exercise.Id);
+                var exerciseRow = await _exerciseRepository.FirstOrDefaultAsync(i => i.Id == exercise.Id);
                 if (exerciseRow != null)
                 {
                     exerciseRow.Name = exercise.Name;
@@ -116,7 +116,7 @@ namespace TeleNeuro.Service.ExerciseService
         /// <returns></returns>
         public async Task<bool> ToggleExerciseStatus(int exerciseId)
         {
-            var exerciseRow = await _exerciseRepository.FindOrDefaultAsync(i => i.Id == exerciseId);
+            var exerciseRow = await _exerciseRepository.FirstOrDefaultAsync(i => i.Id == exerciseId);
             if (exerciseRow != null)
             {
                 exerciseRow.IsActive = !exerciseRow.IsActive;

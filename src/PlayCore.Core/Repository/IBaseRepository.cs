@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using PlayCore.Core.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using PlayCore.Core.Model;
 
 namespace PlayCore.Core.Repository
 {
@@ -13,8 +12,10 @@ namespace PlayCore.Core.Repository
         DbSet<TEntity> GetQueryable<TEntity>() where TEntity : class;
         // Find
         Task<TEntity> FindByIdAsync<TEntity>(int id) where TEntity : class;
-        Task<TEntity> FindOrDefaultAsync<TEntity>(ISpecification<TEntity> filter) where TEntity : class;
-        Task<TEntity> FindOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
+        Task<TEntity> FirstOrDefaultAsync<TEntity>(ISpecification<TEntity> filter) where TEntity : class;
+        Task<TEntity> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
+        Task<TEntity> SingleOrDefaultAsync<TEntity>(ISpecification<TEntity> filter) where TEntity : class;
+        Task<TEntity> SingleOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
 
         //List
         Task<List<TEntity>> ListAllAsync<TEntity>() where TEntity : class;

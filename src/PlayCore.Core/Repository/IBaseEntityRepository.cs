@@ -15,8 +15,10 @@ namespace PlayCore.Core.Repository
 
         // Find
         Task<TEntity> FindByIdAsync(int id);
-        Task<TEntity> FindOrDefaultAsync(ISpecification<TEntity> filter);
-        Task<TEntity> FindOrDefaultAsync(Expression<Func<TEntity, bool>> filter);
+        Task<TEntity> FirstOrDefaultAsync(ISpecification<TEntity> filter);
+        Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter);
+        Task<TEntity> SingleOrDefaultAsync(ISpecification<TEntity> filter);
+        Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> filter);
 
         // List
         Task<List<TEntity>> ListAllAsync();
