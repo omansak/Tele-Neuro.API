@@ -122,11 +122,11 @@ namespace PlayCore.Core.Repository
         }
         public async Task<IEnumerable<TEntity>> ListFilterAsync<TEntity>(BaseFilterModel baseFilterModel) where TEntity : class
         {
-            return await _context.Set<TEntity>().AsQueryable().ToLinqFromBaseFilter(baseFilterModel).ToListAsync(cancellationToken: _cancellationToken);
+            return await _context.Set<TEntity>().AsQueryable().ToQueryableFromBaseFilter(baseFilterModel).ToListAsync(cancellationToken: _cancellationToken);
         }
         public async Task<int> CountFilterAsync<TEntity>(BaseFilterModel baseFilterModel, bool includeFilters = true, bool includePaging = true) where TEntity : class
         {
-            return await _context.Set<TEntity>().AsQueryable().ToLinqFromBaseFilter(baseFilterModel, includeFilters, includePaging).CountAsync(cancellationToken: _cancellationToken);
+            return await _context.Set<TEntity>().AsQueryable().ToQueryableFromBaseFilter(baseFilterModel, includeFilters, includePaging).CountAsync(cancellationToken: _cancellationToken);
         }
         public async Task<IEnumerable<TEntity>> ExecuteQueryListAsync<TEntity>(string raw, params object[] parameters) where TEntity : class
         {

@@ -8,7 +8,7 @@ namespace PlayCore.Core.Extension
 {
     public static class BaseFilterModelExtensions
     {
-        public static IQueryable<TEntity> ToLinqFromBaseFilter<TEntity>(this IQueryable<TEntity> query, BaseFilterModel baseFilterModel, bool includeFilters = true, bool includePaging = true)
+        public static IQueryable<TEntity> ToQueryableFromBaseFilter<TEntity>(this IQueryable<TEntity> query, BaseFilterModel baseFilterModel, bool includeFilters = true, bool includePaging = true)
         {
             if (baseFilterModel.SortBy is {IsValid: true})
             {

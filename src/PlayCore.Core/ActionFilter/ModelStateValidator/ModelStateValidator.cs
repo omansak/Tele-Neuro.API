@@ -45,14 +45,14 @@ namespace PlayCore.Core.ActionFilter.ModelStateValidator
             _entry = entry;
         }
 
-        public List<BaseModel> MessagesWithKeys()
+        public List<KeyValueModel> MessagesWithKeys()
         {
-            List<BaseModel> list = new List<BaseModel>();
+            List<KeyValueModel> list = new List<KeyValueModel>();
             foreach (var item in _entry)
             {
                 if (item.Value.ValidationState == ModelValidationState.Invalid)
                 {
-                    list.Add(new BaseModel
+                    list.Add(new KeyValueModel
                     {
                         Key = item.Key,
                         Value = string.Join(null, item.Value.Errors.Select(i => i.ErrorMessage))
