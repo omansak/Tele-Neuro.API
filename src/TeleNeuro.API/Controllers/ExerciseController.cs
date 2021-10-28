@@ -7,7 +7,7 @@ using Service.Document.DocumentServiceSelector;
 using Service.Document.Model;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using PlayCore.Core.HostedService;
+using PlayCore.Core.QueuedHostedService;
 using TeleNeuro.API.Models;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.ExerciseService;

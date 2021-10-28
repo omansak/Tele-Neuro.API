@@ -49,13 +49,13 @@ namespace PlayCore.Core.PasswordHasher
         }
 
         /// <summary>
-        /// Creates a hash from a password with 10000 iterations
+        /// Creates a hash from a password with random between 5000-10000 iterations
         /// </summary>
         /// <param name="password">The password.</param>
         /// <returns>The hash.</returns>
         public string Hash(string password)
         {
-            return Hash(password, 10000);
+            return Hash(password, new Random().Next(5000, 10000));
         }
 
         /// <summary>
@@ -108,7 +108,6 @@ namespace PlayCore.Core.PasswordHasher
             {
                 return (int.Parse(collections.Groups[1].Value), collections.Groups[2].Value);
             }
-
             return null;
         }
 

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlayCore.Core.HostedService
+namespace PlayCore.Core.QueuedHostedService
 {
     public interface IBackgroundTaskQueue
     {

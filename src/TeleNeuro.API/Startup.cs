@@ -12,9 +12,13 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
 using System.Data.Common;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
-using PlayCore.Core.HostedService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using PlayCore.Core.Logger;
+using PlayCore.Core.Managers.JWTAuthenticationManager;
+using PlayCore.Core.QueuedHostedService;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Video.Vimeo;
 using TeleNeuro.Entities;
@@ -56,6 +60,12 @@ namespace TeleNeuro.API
             //Context
             services.AddDbContext<TeleNeuroDatabaseContext>(options => options.UseSqlServer(Configuration["Credential:ConnectionString"]));
             //Dependencies
+            services.AddJWTAuthenticationManager(new JWTTokenConfig
+            {
+                Issuer = Configuration["JWTTokenConfig:Issuer"],
+                Audience = Configuration["JWTTokenConfig:Audience"],
+                Secret = Configuration["JWTTokenConfig:Secret"]
+            });
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IExerciseService, ExerciseService>();
             services.AddScoped<IProgramService, ProgramService>();
@@ -126,6 +136,29 @@ namespace TeleNeuro.API
             // BackgroundService
             services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            // Auth.
+            services
+                .AddAuthentication(i =>
+                {
+                    i.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    i.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(i =>
+                {
+                    i.RequireHttpsMetadata = true;
+                    i.SaveToken = true;
+                    i.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["JWTTokenConfig:Issuer"],
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["JWTTokenConfig:Secret"])),
+                        ValidAudience = Configuration["JWTTokenConfig:Audience"],
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(1)
+                    };
+                });
             // MVC
             services.AddControllers();
             services.AddMvcCore();
