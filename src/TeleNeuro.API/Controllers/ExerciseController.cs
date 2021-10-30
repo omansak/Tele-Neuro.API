@@ -6,16 +6,21 @@ using PlayCore.Core.Model;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Model;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using PlayCore.Core.QueuedHostedService;
+using TeleNeuro.API.Attributes;
 using TeleNeuro.API.Models;
+using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.ExerciseService;
 
 namespace TeleNeuro.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [MinimumRoleAuthorize(UserRoleDefinition.Contributor)]
     public class ExerciseController
     {
         private readonly IExerciseService _exerciseService;
@@ -45,6 +50,7 @@ namespace TeleNeuro.API.Controllers
                 .SetPageSize(pageInfo.PageSize);
         }
         [HttpPost]
+        [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse> UpdateExercise([FromForm] ExerciseModel model)
         {
             var exerciseInfo = await _exerciseService.UpdateExercise(new Exercise()
@@ -86,6 +92,7 @@ namespace TeleNeuro.API.Controllers
             return new BaseResponse().SetResult(exerciseInfo);
         }
         [HttpPost]
+        [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse> ToggleExerciseStatus(ExerciseModel model)
         {
             return new BaseResponse().SetResult(await _exerciseService.ToggleExerciseStatus(model.Id));

@@ -100,13 +100,13 @@ namespace PlayCore.Core.Managers.JWTAuthenticationManager
                 .ValidateToken(token,
                     new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidIssuer = _jwtTokenConfig.Issuer,
-                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(_secret),
+                        ValidIssuer = _jwtTokenConfig.Issuer,
                         ValidAudience = _jwtTokenConfig.Audience,
-                        ValidateAudience = true,
+                        ValidateIssuer = !string.IsNullOrWhiteSpace(_jwtTokenConfig.Issuer),
+                        ValidateAudience = !string.IsNullOrWhiteSpace(_jwtTokenConfig.Audience),
                         ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
                         ClockSkew = TimeSpan.FromMinutes(1)
                     },
                     out var validatedToken);

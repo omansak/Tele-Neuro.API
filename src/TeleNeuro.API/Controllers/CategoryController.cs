@@ -1,30 +1,39 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Model;
+using System.Linq;
 using System.Threading.Tasks;
+using TeleNeuro.API.Attributes;
 using TeleNeuro.API.Models;
+using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.CategoryService;
 
 namespace TeleNeuro.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [MinimumRoleAuthorize(UserRoleDefinition.Contributor)]
     public class CategoryController
     {
         private readonly ICategoryService _categoryService;
         private readonly IDocumentServiceSelector _documentServiceSelector;
-
-        public CategoryController(ICategoryService categoryService, IDocumentServiceSelector documentServiceSelector)
+        private readonly IUserManagerService _userManagerService;
+        public CategoryController(ICategoryService categoryService, IDocumentServiceSelector documentServiceSelector, IUserManagerService userManagerService)
         {
             _categoryService = categoryService;
             _documentServiceSelector = documentServiceSelector;
+            _userManagerService = userManagerService;
         }
         [HttpPost]
+        [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse> ListCategories(PageInfo pageInfo)
         {
+            var asd = _userManagerService.Roles.ToList();
             return new BaseResponse()
                 .SetResult(await _categoryService.ListCategories(pageInfo))
                 .SetTotalCount(await _categoryService.CountCategories())
@@ -41,6 +50,7 @@ namespace TeleNeuro.API.Controllers
                 .SetPageSize(pageInfo.PageSize);
         }
         [HttpPost]
+        [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse> UpdateCategory([FromForm] CategoryModel model)
         {
             DocumentResult documentResult = null;
@@ -59,6 +69,7 @@ namespace TeleNeuro.API.Controllers
             }));
         }
         [HttpPost]
+        [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse> ToggleCategoryStatus(CategoryModel model)
         {
             return new BaseResponse().SetResult(await _categoryService.ToggleCategoryStatus(model.Id));

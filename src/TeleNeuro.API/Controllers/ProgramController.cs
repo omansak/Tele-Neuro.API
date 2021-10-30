@@ -1,15 +1,20 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
+using TeleNeuro.API.Attributes;
 using TeleNeuro.API.Models;
+using TeleNeuro.API.Services;
 using TeleNeuro.Service.ProgramService;
 using TeleNeuro.Service.ProgramService.Models;
 
 namespace TeleNeuro.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [MinimumRoleAuthorize(UserRoleDefinition.Contributor)]
     public class ProgramController
     {
         private readonly IProgramService _programService;

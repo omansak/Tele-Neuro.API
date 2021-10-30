@@ -2,11 +2,13 @@
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using TeleNeuro.Service.ExerciseService;
 using TeleNeuro.Service.ProgramService;
 
 namespace TeleNeuro.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
     public class ContentController

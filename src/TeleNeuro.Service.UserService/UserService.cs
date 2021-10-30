@@ -23,7 +23,7 @@ namespace TeleNeuro.Service.UserService
             _baseRepository = baseRepository;
             _roleDefinitions ??= new ConcurrentBag<Role>(_baseRepository.GetQueryable<Role>().ToList());
         }
-
+        public ConcurrentBag<Role> RoleDefinition => _roleDefinitions;
         public async Task<bool> Register(UserRegisterModel model)
         {
             if (!string.IsNullOrWhiteSpace(model.Email) && !string.IsNullOrWhiteSpace(model.Password))
@@ -69,7 +69,6 @@ namespace TeleNeuro.Service.UserService
             }
             throw new UIException("Email & Şifre boş olamaz.");
         }
-
         public async Task<(User User, List<Role> Roles)> Login(UserLoginModel model)
         {
             if (!string.IsNullOrWhiteSpace(model.Email) && !string.IsNullOrWhiteSpace(model.Password))

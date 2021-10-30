@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
@@ -6,6 +7,7 @@ using TeleNeuro.Service.UtilityService;
 
 namespace TeleNeuro.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
     public class UtilityController

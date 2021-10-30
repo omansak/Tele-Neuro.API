@@ -10,6 +10,7 @@ using PlayCore.Core.Extension;
 using Service.Document.Image.ImageSharp;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Data.Common;
 using System.IO;
 using System.Text;
@@ -21,6 +22,7 @@ using PlayCore.Core.Managers.JWTAuthenticationManager;
 using PlayCore.Core.QueuedHostedService;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Video.Vimeo;
+using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService;
@@ -34,6 +36,7 @@ namespace TeleNeuro.API
 {
     public class Startup
     {
+        public static ConcurrentBag<Role> RoleDefinitions { get; set; }
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment WebHostEnvironment { get; }
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
@@ -50,9 +53,30 @@ namespace TeleNeuro.API
         public void ConfigureServices(IServiceCollection services)
         {
             //Swagger
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(i =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TeleNeuro.API", Version = "v1" });
+                i.SwaggerDoc("v1", new OpenApiInfo { Title = "TeleNeuro.API", Version = "v1" });
+                i.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme,
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Please insert JWT with Bearer into field",
+                        Name = "JWT Authorization",
+                        Type = SecuritySchemeType.Http
+                    });
+                i.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id =JwtBearerDefaults.AuthenticationScheme
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
             });
             //PlayCore
             services.AddBaseRepository();
@@ -60,6 +84,7 @@ namespace TeleNeuro.API
             //Context
             services.AddDbContext<TeleNeuroDatabaseContext>(options => options.UseSqlServer(Configuration["Credential:ConnectionString"]));
             //Dependencies
+            services.AddHttpContextAccessor();
             services.AddJWTAuthenticationManager(new JWTTokenConfig
             {
                 Issuer = Configuration["JWTTokenConfig:Issuer"],
@@ -67,6 +92,7 @@ namespace TeleNeuro.API
                 Secret = Configuration["JWTTokenConfig:Secret"]
             });
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IUserManagerService, UserManagerService>();
             services.AddScoped<IExerciseService, ExerciseService>();
             services.AddScoped<IProgramService, ProgramService>();
             services.AddScoped<IUtilityService, UtilityService>();
@@ -140,22 +166,21 @@ namespace TeleNeuro.API
             services
                 .AddAuthentication(i =>
                 {
-                    i.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    i.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    i.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer(i =>
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, i =>
                 {
                     i.RequireHttpsMetadata = true;
                     i.SaveToken = true;
                     i.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidIssuer = Configuration["JWTTokenConfig:Issuer"],
-                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["JWTTokenConfig:Secret"])),
+                        ValidIssuer = Configuration["JWTTokenConfig:Issuer"],
                         ValidAudience = Configuration["JWTTokenConfig:Audience"],
-                        ValidateAudience = true,
+                        ValidateIssuer = !string.IsNullOrWhiteSpace(Configuration["JWTTokenConfig:Issuer"]),
+                        ValidateAudience = !string.IsNullOrWhiteSpace(Configuration["JWTTokenConfig:Audience"]),
                         ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
                 });
@@ -164,7 +189,7 @@ namespace TeleNeuro.API
             services.AddMvcCore();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUserService userService)
         {
             if (env.IsDevelopment())
             {
@@ -172,6 +197,8 @@ namespace TeleNeuro.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TeleNeuro.API v1"));
             }
+            // Init 
+            RoleDefinitions = userService.RoleDefinition;
             // Static Files
             app.UseImageSharp();
             app.UseStaticFiles(new StaticFileOptions
@@ -203,6 +230,7 @@ namespace TeleNeuro.API
                 }
                 return i;
             });
+
             // MVC
             app.UseHttpsRedirection();
             app.UseCors(i => i
@@ -211,6 +239,7 @@ namespace TeleNeuro.API
                 .AllowAnyHeader());
 
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
