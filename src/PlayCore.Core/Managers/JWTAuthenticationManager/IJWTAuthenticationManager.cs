@@ -10,7 +10,7 @@ namespace PlayCore.Core.Managers.JWTAuthenticationManager
         void RemoveExpiredRefreshTokens(DateTime now);
         void RemoveRefreshToken(string guid);
         JWTTokenResult Generate(string guid, IEnumerable<Claim> claims);
-        JWTTokenResult Refresh(string refreshToken, string accessToken);
+        JWTTokenResult Refresh(string refreshToken, string accessToken, string guid);
         (ClaimsPrincipal, JwtSecurityToken) Decode(string token);
     }
 }

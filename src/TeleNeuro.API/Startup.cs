@@ -62,6 +62,8 @@ namespace TeleNeuro.API
                         In = ParameterLocation.Header,
                         Description = "Please insert JWT with Bearer into field",
                         Name = "JWT Authorization",
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
                         Type = SecuritySchemeType.Http
                     });
                 i.AddSecurityRequirement(new OpenApiSecurityRequirement {

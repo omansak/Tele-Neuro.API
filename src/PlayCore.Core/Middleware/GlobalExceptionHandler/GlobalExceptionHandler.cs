@@ -82,11 +82,15 @@ namespace PlayCore.Core.Middleware.GlobalExceptionHandler
                 }
                 if (ex.Data.HasKey("ResultType"))
                 {
-                    baseResponse.Result.Type = ex.Data["ResultType"].ToString().Split('.').Last();
+                    baseResponse.Result.Type = ex.Data["ResultType"]!.ToString()!.Split('.').Last();
                 }
                 if (ex.Data.HasKey("ResultMessage"))
                 {
-                    baseResponse.Result.Message = ex.Data["ResultMessage"].ToString();
+                    baseResponse.Result.Message = ex.Data["ResultMessage"]!.ToString();
+                }
+                if (ex.Data.HasKey("ResultCode"))
+                {
+                    baseResponse.Status.Code = ex.Data["ResultCode"]! as int? ?? 500;
                 }
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = baseResponse.Status.Code;

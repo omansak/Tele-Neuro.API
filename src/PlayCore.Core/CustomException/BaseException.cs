@@ -30,6 +30,10 @@ namespace PlayCore.Core.CustomException
             base.Data.Add("ResultType", type);
             return this;
         }
-
+        public BaseException SetResultCode(int code)
+        {
+            base.Data.Add("ResultCode", code);
+            return this;
+        }
     }
 }

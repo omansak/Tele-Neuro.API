@@ -69,15 +69,13 @@ namespace PlayCore.Core.Managers.JWTAuthenticationManager
             };
         }
 
-        public JWTTokenResult Refresh(string refreshToken, string accessToken)
+        public JWTTokenResult Refresh(string refreshToken, string accessToken, string guid)
         {
             var (principal, jwtToken) = Decode(accessToken);
             if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature))
             {
                 throw new SecurityTokenException("Invalid token");
             }
-
-            var guid = principal.Identity?.Name;
             if (!_refreshTokens.TryGetValue(refreshToken, out var existingRefreshToken))
             {
                 throw new SecurityTokenException("Invalid token");

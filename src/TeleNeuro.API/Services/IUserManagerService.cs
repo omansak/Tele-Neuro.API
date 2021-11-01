@@ -6,6 +6,7 @@ namespace TeleNeuro.API.Services
     {
         bool IsAuthenticated { get; }
         int UserId { get; }
+        string Token { get; }
         IEnumerable<string> Roles { get; }
     }
 }

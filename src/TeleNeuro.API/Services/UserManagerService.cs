@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace TeleNeuro.API.Services
 {
@@ -43,7 +45,23 @@ namespace TeleNeuro.API.Services
                         }
                     }
                 }
-                throw new UIException("Kullanıcı Id bulunamadı");
+                throw new UIException("Kullanıcı Id bulunamadı").SetResultCode(401);
+            }
+        }
+
+        public string Token
+        {
+            get
+            {
+                if (IsAuthenticated)
+                {
+                    var token = _httpContextAccessor.HttpContext!.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token").GetAwaiter().GetResult();
+                    if (!string.IsNullOrWhiteSpace(token))
+                    {
+                        return token;
+                    }
+                }
+                throw new UIException("Kullanıcı Token bulunamadı").SetResultCode(401);
             }
         }
 
@@ -55,7 +73,7 @@ namespace TeleNeuro.API.Services
                 {
                     return _user.Claims.Where(i => i.Type == ClaimTypes.Role).Select(i => i.Value);
                 }
-                throw new UIException("Kullanıcı Role bulunamadı");
+                throw new UIException("Kullanıcı Role bulunamadı").SetResultCode(401);
             }
         }
 
