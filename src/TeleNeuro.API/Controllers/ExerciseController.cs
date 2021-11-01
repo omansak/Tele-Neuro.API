@@ -8,6 +8,7 @@ using Service.Document.Model;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using PlayCore.Core.CustomException;
 using PlayCore.Core.QueuedHostedService;
 using TeleNeuro.API.Attributes;
 using TeleNeuro.API.Models;
@@ -24,15 +25,15 @@ namespace TeleNeuro.API.Controllers
     public class ExerciseController
     {
         private readonly IExerciseService _exerciseService;
-        private readonly IDocumentServiceSelector _documentServiceSelector;
         private readonly IBackgroundTaskQueue _queue;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        public ExerciseController(IExerciseService exerciseService, IDocumentServiceSelector documentServiceSelector, IBackgroundTaskQueue queue, IServiceScopeFactory serviceScopeFactory)
+        private readonly IUserManagerService _userManagerService;
+        public ExerciseController(IExerciseService exerciseService, IBackgroundTaskQueue queue, IServiceScopeFactory serviceScopeFactory, IUserManagerService userManagerService)
         {
             _exerciseService = exerciseService;
-            _documentServiceSelector = documentServiceSelector;
             _queue = queue;
             _serviceScopeFactory = serviceScopeFactory;
+            _userManagerService = userManagerService;
         }
         [HttpPost]
         public async Task<BaseResponse> SearchExercises(SearchTermModel model)
@@ -53,14 +54,21 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse> UpdateExercise([FromForm] ExerciseModel model)
         {
+            if (model.Id == 0 && model.File?.Length == 0)
+            {
+                throw new UIException("Ýçerik bulunamadý.");
+            }
+
             var exerciseInfo = await _exerciseService.UpdateExercise(new Exercise()
             {
                 Id = model.Id,
                 Name = model.Name,
                 Description = model.Description,
+                CreatedUser = _userManagerService.UserId,
                 IsActive = model.IsActive
             });
-            if (exerciseInfo != null)
+
+            if (model.File?.Length > 0 && exerciseInfo != null)
             {
                 MemoryStream memoryStream = new MemoryStream();
                 await model.File.CopyToAsync(memoryStream);
@@ -84,6 +92,7 @@ namespace TeleNeuro.API.Controllers
                         if (documentResult?.Guid != null)
                         {
                             exerciseInfo.Exercise.DocumentGuid = documentResult.Guid;
+                            exerciseInfo.Exercise.CreatedUser = _userManagerService.UserId;
                             await exerciseService.UpdateExercise(exerciseInfo.Exercise);
                         }
                     }

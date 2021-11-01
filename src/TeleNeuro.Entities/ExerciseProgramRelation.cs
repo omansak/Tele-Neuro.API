@@ -21,6 +21,6 @@ namespace TeleNeuro.Entities
         [Column("CREATED_DATE")]
         public DateTime CreatedDate { get; set; }
         [Column("CREATED_USER")]
-        public int? CreatedUser { get; set; }
+        public int CreatedUser { get; set; }
     }
 }

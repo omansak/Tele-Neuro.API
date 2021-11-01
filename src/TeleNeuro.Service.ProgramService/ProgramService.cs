@@ -77,6 +77,7 @@ namespace TeleNeuro.Service.ProgramService
                     programRow.IsActive = program.IsActive;
                     programRow.IsPublic = program.IsPublic;
                     programRow.CreatedDate = System.DateTime.Now;
+                    programRow.CreatedUser = program.CategoryId;
                     var result = await _programRepository.UpdateAsync(programRow);
                     return await GetProgram(result.Id);
                 }
@@ -91,7 +92,8 @@ namespace TeleNeuro.Service.ProgramService
                     Description = program.Description,
                     IsActive = true,
                     IsPublic = program.IsPublic,
-                    CreatedDate = System.DateTime.Now
+                    CreatedDate = System.DateTime.Now,
+                    CreatedUser = program.CategoryId
                 });
                 return await GetProgram(result.Id);
             }

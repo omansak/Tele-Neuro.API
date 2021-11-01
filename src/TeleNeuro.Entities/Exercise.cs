@@ -19,7 +19,7 @@ namespace TeleNeuro.Entities
         [Column("CREATED_DATE")]
         public DateTime CreatedDate { get; set; }
         [Column("CREATED_USER")]
-        public string CreatedUser { get; set; }
+        public int CreatedUser { get; set; }
         [Column("DOCUMENT_GUID")]
         public string DocumentGuid { get; set; }
     }

@@ -85,6 +85,7 @@ namespace TeleNeuro.Service.CategoryService
                     categoryRow.Description = category.Description;
                     categoryRow.IsActive = category.IsActive;
                     categoryRow.CreatedDate = System.DateTime.Now;
+                    categoryRow.CreatedUser = category.CreatedUser;
                     if (!string.IsNullOrWhiteSpace(category.DocumentGuid))
                         categoryRow.DocumentGuid = category.DocumentGuid;
 
@@ -104,7 +105,8 @@ namespace TeleNeuro.Service.CategoryService
                         Description = category.Description,
                         IsActive = true,
                         CreatedDate = System.DateTime.Now,
-                        DocumentGuid = category.DocumentGuid
+                        DocumentGuid = category.DocumentGuid,
+                        CreatedUser = category.CreatedUser
                     });
                     return await GetCategory(result.Id);
                 }

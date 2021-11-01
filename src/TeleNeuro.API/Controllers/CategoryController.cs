@@ -65,7 +65,8 @@ namespace TeleNeuro.API.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 IsActive = model.IsActive,
-                DocumentGuid = documentResult?.Guid
+                DocumentGuid = documentResult?.Guid,
+                CreatedUser = _userManagerService.UserId
             }));
         }
         [HttpPost]

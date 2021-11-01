@@ -87,6 +87,7 @@ namespace TeleNeuro.Service.ExerciseService
                     exerciseRow.Description = exercise.Description;
                     exerciseRow.IsActive = exercise.IsActive;
                     exerciseRow.CreatedDate = System.DateTime.Now;
+                    exerciseRow.CreatedUser = exercise.CreatedUser;
                     if (!string.IsNullOrWhiteSpace(exercise.DocumentGuid))
                         exerciseRow.DocumentGuid = exercise.DocumentGuid;
 
@@ -104,7 +105,8 @@ namespace TeleNeuro.Service.ExerciseService
                     Description = exercise.Description,
                     IsActive = true,
                     CreatedDate = System.DateTime.Now,
-                    DocumentGuid = exercise.DocumentGuid
+                    DocumentGuid = exercise.DocumentGuid,
+                    CreatedUser = exercise.CreatedUser
                 });
                 return await GetExercise(result.Id);
             }

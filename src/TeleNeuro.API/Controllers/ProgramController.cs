@@ -18,10 +18,11 @@ namespace TeleNeuro.API.Controllers
     public class ProgramController
     {
         private readonly IProgramService _programService;
-
-        public ProgramController(IProgramService programService)
+        private readonly IUserManagerService _userManagerService;
+        public ProgramController(IProgramService programService, IUserManagerService userManagerService)
         {
             _programService = programService;
+            _userManagerService = userManagerService;
         }
         [HttpPost]
         public async Task<BaseResponse> ListPrograms(PageInfo pageInfo)
@@ -42,7 +43,8 @@ namespace TeleNeuro.API.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 IsActive = model.IsActive,
-                IsPublic = model.IsPublic
+                IsPublic = model.IsPublic,
+                CreatedUser = _userManagerService.UserId
             }));
         }
         [HttpPost]
@@ -53,6 +55,7 @@ namespace TeleNeuro.API.Controllers
         [HttpPost]
         public async Task<BaseResponse> AssignExercise(AssignExerciseModel model)
         {
+            model.UserId = _userManagerService.UserId;
             return new BaseResponse().SetResult(await _programService.AssignExercise(model));
         }
         [HttpPost]
