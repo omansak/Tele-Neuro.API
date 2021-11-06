@@ -6,7 +6,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PlayCore.Core.Extension;
+using PlayCore.Core.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.UserService.Models;
@@ -24,16 +28,86 @@ namespace TeleNeuro.Service.UserService
             _roleDefinitions ??= new ConcurrentBag<Role>(_baseRepository.GetQueryable<Role>().ToList());
         }
         public ConcurrentBag<Role> RoleDefinition => _roleDefinitions;
-        public async Task<bool> Register(UserRegisterModel model)
+        public async Task<List<UserInfo>> ListFilterUsers(BaseFilterModel model)
         {
+            return await GetQueryableFilterUsers(model).ToListAsync();
+        }
+        public async Task<int> CountFilterUsers(BaseFilterModel model)
+        {
+            return await GetQueryableFilterUsers(model, true, false).CountAsync();
+        }
+        public async Task<int> UpdateUser(UserRegisterModel model)
+        {
+            var validateHelper = new ValidateHelper();
+            async Task AddRole(int userId)
+            {
+                var userRoles = await _baseRepository.ListAsync<UserRoleRelation>(i => i.UserId == userId);
+                if (userRoles != null)
+                {
+                    await _baseRepository.DeleteRangeAsync(userRoles);
+                }
+
+                if (model.RoleKey != null)
+                {
+                    foreach (var roleKey in model.RoleKey)
+                    {
+                        Role role = _roleDefinitions.SingleOrDefault(i => i.Key == roleKey);
+                        if (role != null)
+                        {
+                            var userRole = await _baseRepository.InsertAsync(new UserRoleRelation
+                            {
+                                CreatedDate = DateTime.Now,
+                                RoleId = role.Id,
+                                UserId = userId
+                            });
+
+                            if (userRole == null)
+                            {
+                                throw new UIException("Kullanıcı rolü eklenemedi.");
+                            }
+                        }
+                    }
+                    return;
+                }
+                throw new UIException("Kullanıcı rolü bulanamdı.");
+            }
+
+            if (model.Id > 0)
+            {
+                var user = await _baseRepository.SingleOrDefaultAsync<User>(i => i.Id == model.Id);
+                if (user != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(model.Email) && validateHelper.ValidateEmail(model.Email))
+                    {
+                        user.Email = model.Email;
+                        await _baseRepository.UpdateAsync(user);
+                        var userProfile = await _baseRepository.SingleOrDefaultAsync<UserProfile>(i => i.UserId == user.Id);
+                        if (userProfile != null)
+                        {
+                            if (model.RoleKey?.Length == 0)
+                            {
+                                throw new UIException("Kullanıcı rolü bulanamdı.");
+                            }
+                            userProfile.Name = model.Name;
+                            userProfile.Surname = model.Surname;
+                            await _baseRepository.UpdateAsync(userProfile);
+                            await AddRole(user.Id);
+                            return user.Id;
+                        }
+                        throw new UIException("Kullanıcı profili bulunamadı.");
+                    }
+                    throw new UIException("Email boş olamaz yada hatalı format olamaz.");
+                }
+                throw new UIException("Kullanıcı bulunamadı.");
+            }
+
             if (!string.IsNullOrWhiteSpace(model.Email) && !string.IsNullOrWhiteSpace(model.Password))
             {
-                var validateHelper = new ValidateHelper();
                 if (validateHelper.ValidateEmail(model.Email) && validateHelper.ValidatePassword(model.Password))
                 {
                     if (await _baseRepository.AnyAsync<User>(i => i.Email == model.Email))
                     {
-                        throw new UIException("Kullanıcı mevcut.");
+                        throw new UIException("Email adresi kullanıyor.");
                     }
 
                     var user = await _baseRepository.InsertAsync(new User
@@ -45,23 +119,19 @@ namespace TeleNeuro.Service.UserService
                     });
                     if (user != null)
                     {
-                        Role role = _roleDefinitions.SingleOrDefault(i => i.Key == model.RoleKey);
-                        if (role != null)
+                        var userProfile = await _baseRepository.InsertAsync(new UserProfile
                         {
-                            var userRole = await _baseRepository.InsertAsync(new UserRoleRelation
-                            {
-                                CreatedDate = DateTime.Now,
-                                RoleId = role.Id,
-                                UserId = user.Id
-                            });
+                            UserId = user.Id,
+                            Name = model.Name,
+                            Surname = model.Surname
+                        });
 
-                            if (userRole != null)
-                            {
-                                return true;
-                            }
-                            throw new UIException("Kullanıcı rolü eklenemedi.");
+                        if (userProfile != null)
+                        {
+                            await AddRole(user.Id);
+                            return user.Id;
                         }
-                        throw new UIException("Kullanıcı rolü bulunamadı.");
+                        throw new UIException("Kullanıcı profil eklenemedi.");
                     }
                     throw new UIException("Kullanıcı eklenirken hata oluştu.");
                 }
@@ -87,6 +157,31 @@ namespace TeleNeuro.Service.UserService
                 throw new UIException("Email & Şifre formatı hatalı");
             }
             throw new UIException("Email & Şifre boş olamaz.");
+        }
+        private IQueryable<UserInfo> GetQueryableFilterUsers(BaseFilterModel model, bool includeFilter = true, bool includePaging = true)
+        {
+            return _baseRepository
+                .GetQueryable<User>()
+                .Join(_baseRepository.GetQueryable<UserProfile>(), i => i.Id, j => j.UserId, (i, j) => new
+                {
+                    User = i,
+                    UserProfile = j
+                })
+                .Select(i => new UserInfo
+                {
+                    User = i.User,
+                    UserProfile = i.UserProfile,
+                    Roles = _baseRepository
+                        .GetQueryable<UserRoleRelation>()
+                        .Where(j => j.UserId == i.User.Id)
+                        .Join(_baseRepository.GetQueryable<Role>(), k => k.RoleId, j => j.Id, (ik, j) => new
+                        {
+                            Role = j
+                        })
+                        .Select(k => k.Role.Key)
+                        .ToList()
+                })
+                .ToQueryableFromBaseFilter(model, includeFilter, includePaging);
         }
     }
 }

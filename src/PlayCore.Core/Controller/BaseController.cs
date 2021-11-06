@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlayCore.Core.Extension;
@@ -12,34 +13,33 @@ namespace PlayCore.Core.Controller
     public class BaseController<TEntity, TContext> : ControllerBase where TContext : DbContext where TEntity : class
     {
         private readonly IBaseRepository<TEntity, TContext> _service;
-        private readonly BaseResponse _baseResponse;
 
         public BaseController(IBaseRepository<TEntity, TContext> service)
         {
             _service = service;
-            _baseResponse = new BaseResponse();
         }
 
         [HttpGet("Get")]
-        public async Task<BaseResponse> Get(int id)
+        public async Task<BaseResponse<TEntity>> Get(int id)
         {
-            return _baseResponse.SetResult(await _service.FindByIdAsync(id));
+            return new BaseResponse<TEntity>().SetResult(await _service.FindByIdAsync(id));
         }
 
         [HttpGet("List")]
-        public async Task<BaseResponse> List()
+        public async Task<BaseResponse<IEnumerable<TEntity>>> List()
         {
-            return _baseResponse
-                .SetResult(await _service.ListAllAsync())
-                .SetTotalCount(_baseResponse.Result.Count)
-                .SetPage(1)
-                .SetPageSize(1);
+            var response = new BaseResponse<IEnumerable<TEntity>>()
+               .SetResult(await _service.ListAllAsync());
+            response.SetTotalCount(response.Result.Count)
+               .SetPage(1)
+               .SetPageSize(1);
+            return response;
         }
 
         [HttpPost("ListFilter")]
-        public async Task<BaseResponse> ListFilter(BaseFilterModel baseFilterModel)
+        public async Task<BaseResponse<IEnumerable<TEntity>>> ListFilter(BaseFilterModel baseFilterModel)
         {
-            return _baseResponse
+            return new BaseResponse<IEnumerable<TEntity>>()
                 .SetResult(await _service.ListFilterAsync(baseFilterModel))
                 .SetTotalCount(await _service.CountFilterAsync(baseFilterModel, includePaging: false))
                 .SetPage(MathExtensions.UpDivision(baseFilterModel.PagingBy.Skip + baseFilterModel.PagingBy.Take,
@@ -48,15 +48,19 @@ namespace PlayCore.Core.Controller
         }
 
         [HttpGet("Count")]
-        public async Task<BaseResponse> Count()
+        public async Task<BaseResponse<int>> Count()
         {
-            return _baseResponse.SetResult(await _service.CountAsync());
+            return new BaseResponse<int>().SetResult(await _service.CountAsync());
         }
-
+        /// <summary>
+        /// BaseFilterModel
+        /// </summary>
+        /// <param name="baseFilterModel"></param>
+        /// <returns></returns>
         [HttpPost("CountFilter")]
-        public async Task<BaseResponse> CountFilter(BaseFilterModel baseFilterModel)
+        public async Task<BaseResponse<int>> CountFilter(BaseFilterModel baseFilterModel)
         {
-            return _baseResponse.SetResult(await _service.CountFilterAsync(baseFilterModel));
+            return new BaseResponse<int>().SetResult(await _service.CountFilterAsync(baseFilterModel));
         }
     }
 }

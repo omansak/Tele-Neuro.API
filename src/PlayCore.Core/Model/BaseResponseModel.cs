@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using PlayCore.Core.Extension;
 
 namespace PlayCore.Core.Model
 {
     // TODO : Maybe DI
-    public class BaseResponse
+    public class BaseResponse<T>
     {
         public ResponseStatus Status { get; set; }
         public ResponseResult Result { get; set; }
@@ -38,7 +37,7 @@ namespace PlayCore.Core.Model
         {
             public string Message { get; set; }
             public string Kind => this.Data?.GetType().ToString().Split('.').Last(); // TODO : Remove
-            public object Data { get; set; } 
+            public T Data { get; set; }
             public string Type { get; set; }
             public int Count
             {
@@ -68,7 +67,44 @@ namespace PlayCore.Core.Model
             };
             this.Result = new ResponseResult();
         }
+
+        public BaseResponse<T> SetResult(T result)
+        {
+            this.Result.Data = result;
+            return this;
+        }
+        public BaseResponse<T> SetCode(int code)
+        {
+            this.Status.Code = code;
+            return this;
+        }
+        public BaseResponse<T> SetDomain(string domain)
+        {
+            this.Status.Domain = domain;
+            return this;
+        }
+        public BaseResponse<T> SetMessage(string message)
+        {
+            this.Result.Message = message;
+            return this;
+        }
+        public BaseResponse<T> SetTotalCount(int count)
+        {
+            this.Result.PageInfo.TotalCount = count;
+            return this;
+        }
+        public BaseResponse<T> SetPage(int? page)
+        {
+            this.Result.PageInfo.Page = page ?? 1;
+            return this;
+        }
+        public BaseResponse<T> SetPageSize(int? pageSize)
+        {
+            this.Result.PageInfo.PageSize = pageSize ?? 1;
+            return this;
+        }
     }
+
     public enum ResponseTypes
     {
 

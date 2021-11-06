@@ -13,6 +13,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -29,6 +30,7 @@ using TeleNeuro.Service.CategoryService;
 using TeleNeuro.Service.ExerciseService;
 using TeleNeuro.Service.ProgramService;
 using TeleNeuro.Service.UserService;
+using TeleNeuro.Service.UserService.Models;
 using TeleNeuro.Service.UtilityService;
 using VimeoDotNet.Exceptions;
 
@@ -55,6 +57,7 @@ namespace TeleNeuro.API
             //Swagger
             services.AddSwaggerGen(i =>
             {
+                i.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
                 i.SwaggerDoc("v1", new OpenApiInfo { Title = "TeleNeuro.API", Version = "v1" });
                 i.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme,
                     new OpenApiSecurityScheme
@@ -190,7 +193,7 @@ namespace TeleNeuro.API
                 });
             // MVC
             services.AddControllers();
-            services.AddMvcCore();
+            services.AddMvcCore().AddNewtonsoftJson();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUserService userService)
@@ -210,7 +213,7 @@ namespace TeleNeuro.API
                 OnPrepareResponse = ctx =>
                 {
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-                    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-TypeAsd, Accept");
                 },
             });
 

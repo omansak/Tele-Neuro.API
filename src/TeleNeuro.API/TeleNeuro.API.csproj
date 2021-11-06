@@ -1,39 +1,48 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="wwwroot\**" />
-    <Content Remove="wwwroot\**" />
-    <EmbeddedResource Remove="wwwroot\**" />
-    <None Remove="wwwroot\**" />
-  </ItemGroup>
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile></DocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="wwwroot\**" />
+		<Content Remove="wwwroot\**" />
+		<EmbeddedResource Remove="wwwroot\**" />
+		<None Remove="wwwroot\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\PlayCore.Core\PlayCore.Core.csproj" />
-    <ProjectReference Include="..\Service.Document.DocumentServiceSelector\Service.Document.DocumentServiceSelector.csproj" />
-    <ProjectReference Include="..\Service.Document.Image.ImageSharp\Service.Document.Image.ImageSharp.csproj" />
-    <ProjectReference Include="..\Service.Document.Video.Vimeo\Service.Document.Video.Vimeo.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Entity.Context\TeleNeuro.Entity.Context.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Service.CategoryService\TeleNeuro.Service.CategoryService.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Service.DocumentService\TeleNeuro.Service.DocumentService.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Service.ExerciseService\TeleNeuro.Service.ExerciseService.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Service.ProgramService\TeleNeuro.Service.ProgramService.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj" />
-    <ProjectReference Include="..\TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\PlayCore.Core\PlayCore.Core.csproj" />
+		<ProjectReference Include="..\Service.Document.DocumentServiceSelector\Service.Document.DocumentServiceSelector.csproj" />
+		<ProjectReference Include="..\Service.Document.Image.ImageSharp\Service.Document.Image.ImageSharp.csproj" />
+		<ProjectReference Include="..\Service.Document.Video.Vimeo\Service.Document.Video.Vimeo.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Entity.Context\TeleNeuro.Entity.Context.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.CategoryService\TeleNeuro.Service.CategoryService.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.DocumentService\TeleNeuro.Service.DocumentService.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.ExerciseService\TeleNeuro.Service.ExerciseService.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.ProgramService\TeleNeuro.Service.ProgramService.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj" />
+	</ItemGroup>
 
 </Project>

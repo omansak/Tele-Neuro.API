@@ -25,6 +25,7 @@ namespace TeleNeuro.Entity.Context
             builder.Entity<Exercise>();
             builder.Entity<Program>();
             builder.Entity<User>();
+            builder.Entity<UserProfile>();
             builder.Entity<Role>();
             builder.Entity<UserRoleRelation>();
             builder.Entity<ExercisePropertyDefinition>();

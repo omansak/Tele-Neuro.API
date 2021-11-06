@@ -60,7 +60,7 @@ namespace PlayCore.Core.Middleware.GlobalExceptionHandler
         {
             if (!context.Response.HasStarted)
             {
-                BaseResponse baseResponse = new BaseResponse
+                BaseResponse<object> baseResponse = new BaseResponse<object>
                 {
                     Status =
                     {

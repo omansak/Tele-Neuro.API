@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
@@ -25,18 +26,18 @@ namespace TeleNeuro.API.Controllers
             _userManagerService = userManagerService;
         }
         [HttpPost]
-        public async Task<BaseResponse> ListPrograms(PageInfo pageInfo)
+        public async Task<BaseResponse<IEnumerable<ProgramInfo>>> ListPrograms(PageInfo pageInfo)
         {
-            return new BaseResponse()
+            return new BaseResponse<IEnumerable<ProgramInfo>>()
                 .SetResult(await _programService.ListPrograms(pageInfo))
                 .SetTotalCount(await _programService.CountPrograms())
                 .SetPage(pageInfo.Page)
                 .SetPageSize(pageInfo.PageSize);
         }
         [HttpPost]
-        public async Task<BaseResponse> UpdateProgram(ProgramModel model)
+        public async Task<BaseResponse<ProgramInfo>> UpdateProgram(ProgramModel model)
         {
-            return new BaseResponse().SetResult(await _programService.UpdateProgram(new Entities.Program
+            return new BaseResponse<ProgramInfo>().SetResult(await _programService.UpdateProgram(new Entities.Program
             {
                 Id = model.Id,
                 CategoryId = model.CategoryId,
@@ -48,30 +49,30 @@ namespace TeleNeuro.API.Controllers
             }));
         }
         [HttpPost]
-        public async Task<BaseResponse> ToggleProgramStatus([FromBody] int id)
+        public async Task<BaseResponse<bool>> ToggleProgramStatus([FromBody] int id)
         {
-            return new BaseResponse().SetResult(await _programService.ToggleProgramStatus(id));
+            return new BaseResponse<bool>().SetResult(await _programService.ToggleProgramStatus(id));
         }
         [HttpPost]
-        public async Task<BaseResponse> AssignExercise(AssignExerciseModel model)
+        public async Task<BaseResponse<int>> AssignExercise(AssignExerciseModel model)
         {
             model.UserId = _userManagerService.UserId;
-            return new BaseResponse().SetResult(await _programService.AssignExercise(model));
+            return new BaseResponse<int>().SetResult(await _programService.AssignExercise(model));
         }
         [HttpPost]
-        public async Task<BaseResponse> AssignedExercises([FromBody] int programId)
+        public async Task<BaseResponse<IEnumerable<ProgramAssignedExerciseInfo>>> AssignedExercises([FromBody] int programId)
         {
-            return new BaseResponse().SetResult(await _programService.AssignedExercises(programId));
+            return new BaseResponse<IEnumerable<ProgramAssignedExerciseInfo>>().SetResult(await _programService.AssignedExercises(programId));
         }
         [HttpPost]
-        public async Task<BaseResponse> ChangeSequenceAssignedExercise(ChangeSequenceModel model)
+        public async Task<BaseResponse<bool>> ChangeSequenceAssignedExercise(ChangeSequenceModel model)
         {
-            return new BaseResponse().SetResult(await _programService.ChangeSequenceAssignedExercise(model.Id, model.Direction));
+            return new BaseResponse<bool>().SetResult(await _programService.ChangeSequenceAssignedExercise(model.Id, model.Direction));
         }
         [HttpPost]
-        public async Task<BaseResponse> DeleteAssignedExercise([FromBody] int relationId)
+        public async Task<BaseResponse<bool>> DeleteAssignedExercise([FromBody] int relationId)
         {
-            return new BaseResponse().SetResult(await _programService.DeleteAssignedExercise(relationId));
+            return new BaseResponse<bool>().SetResult(await _programService.DeleteAssignedExercise(relationId));
         }
     }
 }

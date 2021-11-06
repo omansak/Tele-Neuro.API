@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TeleNeuro.Entities
@@ -6,6 +7,7 @@ namespace TeleNeuro.Entities
     [Table("USER_ROLE_RELATION")]
     public class UserRoleRelation
     {
+        [Key]
         [Column("ID")]
         public int Id { get; set; }
         [Column("ROLE_ID")]

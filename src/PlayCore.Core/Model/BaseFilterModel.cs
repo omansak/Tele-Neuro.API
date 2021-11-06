@@ -1,37 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using PlayCore.Core.Extension;
 
 namespace PlayCore.Core.Model
 {
     public class BaseFilterModel
     {
-        public BaseFilterModel()
-        {
-            this.FilterBy = new List<Filter>();
-            this.PagingBy = new Paging();
-            this.SortBy = new Sort();
-        }
-        public Sort SortBy { get; set; }
         public Paging PagingBy { get; set; }
+        public List<Sort> SortBy { get; set; }
         public List<Filter> FilterBy { get; set; }
-        public class Sort
-        {
-            private OrderType[] _type { get; set; }
-            public OrderType[] Type
-            {
-                get => this._type;
-                set => this._type = value;
-            }
-            private string[] _columnName { get; set; }
-            public string[] ColumnName
-            {
-                get => this._columnName;
-                set => this._columnName = value;
-            }
-            public bool IsValid => _columnName != null && _type != null;
-        }
+        // For Swagger
         public class Paging
         {
             private int _take;
@@ -48,60 +25,57 @@ namespace PlayCore.Core.Model
             }
             public bool IsValid => _take > 0 && _skip > -1;
         }
+        public class Sort
+        {
+            public OrderType Type { get; set; }
+            public string ColumnName { get; set; }
+            public bool IsValid => ColumnName != null;
+        }
         public class Filter
         {
-            public FilterType? Type { get; private set; }
             public string ColumnName { get; set; }
-            public string TypeString
-            {
-                set
-                {
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        switch (value.ToLower())
-                        {
-                            case "contains":
-                            case "%%":
-                                Type = FilterType.Contains;
-                                break;
-                            case "!%%":
-                                Type = FilterType.NotContains;
-                                break;
-                            case "=":
-                            case "==":
-                                Type = FilterType.Equal;
-                                break;
-                            case "!=":
-                                Type = FilterType.NotEqual;
-                                break;
-                            case "startswith":
-                            case "%=":
-                                Type = FilterType.StartsWith;
-                                break;
-                            case "endswith":
-                            case "=%":
-                                Type = FilterType.EndWith;
-                                break;
-                            case "<":
-                                Type = FilterType.LessThan;
-                                break;
-                            case "<=":
-                                Type = FilterType.LessEqualThan;
-                                break;
-                            case ">":
-                                Type = FilterType.GreaterThan;
-                                break;
-                            case ">=":
-                                Type = FilterType.GreaterEqualThan;
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(value), value, "Operator is not defined");
-                        }
-                    }
-                }
-            }
-            public object[] Value { get; set; }
+            public string TypeString { get; set; }
+            public object Value { get; set; }
             public bool IsAndWithNextFilter { get; set; }
+            public bool StartsParentheses { get; set; }
+            public bool EndParentheses { get; set; }
+
+            public static Dictionary<string, FilterType> FilterTypeMap = new()
+            {
+                // Contains
+                { "%%", FilterType.Contains },
+                { "contains", FilterType.Contains },
+                // Not Contains
+                { "!%%", FilterType.NotContains },
+                { "!contains", FilterType.NotContains },
+                // Equal
+                { "=", FilterType.Equal },
+                { "==", FilterType.Equal },
+                { "equal", FilterType.Equal },
+                // Not Equal
+                { "!=", FilterType.NotEqual },
+                { "!equal", FilterType.NotEqual },
+                // StartsWith
+                { "startswith", FilterType.StartsWith },
+                { "%=", FilterType.StartsWith },
+                // EndWith
+                { "endswith", FilterType.EndWith },
+                { "=%", FilterType.EndWith },
+                // LessThan
+                { "<", FilterType.LessThan },
+                // LessEqualThan
+                { "<=", FilterType.LessEqualThan },
+                // LessThan
+                { ">", FilterType.GreaterThan },
+                // LessEqualThan
+                { ">=", FilterType.GreaterEqualThan }
+            };
+            public static FilterType ToFilterType(string value)
+            {
+                if (FilterTypeMap.TryGetValue(value, out var type))
+                    return type;
+                throw new ArgumentOutOfRangeException(nameof(TypeString));
+            }
         }
         public enum OrderType
         {
@@ -122,4 +96,74 @@ namespace PlayCore.Core.Model
             GreaterEqualThan
         }
     }
+
+    #region unsued
+    //public class BaseFilterModel<T> where T : class, new()
+    //{
+    //    public BaseFilterModel.Paging PagingBy { get; set; }
+    //    public List<Sort> SortBy { get; set; }
+    //    public List<Filter> FilterBy { get; set; }
+    //    public class Sort
+    //    {
+    //        internal string ColumnName { get; set; }
+    //        internal BaseFilterModel.OrderType TypeAsd { get; set; }
+    //        public Sort Set<TKey>(Expression<Func<T, TKey>> expression, TKey[] value, BaseFilterModel.OrderType type) where TKey : struct
+    //        {
+    //            if (expression.Body.NodeType != ExpressionType.MemberAccess)
+    //                throw new FormatException("ColumnName");
+
+    //            var body = expression.Body.ToString();
+    //            this.ColumnName = body[(body.IndexOf(".", StringComparison.Ordinal) + 1)..];
+    //            this.TypeAsd = type;
+    //            return this;
+    //        }
+    //    }
+    //    public class Filter
+    //    {
+    //        internal string ColumnName { get; set; }
+    //        internal object Value { get; set; }
+    //        internal bool IsAndWithNextFilter { get; set; }
+    //        internal BaseFilterModel.FilterType TypeAsd { get; set; }
+    //        public Filter Set<TKey>(Expression<Func<T, TKey>> expression, TKey value, BaseFilterModel.FilterType type, bool isAndWithNextFilter = false) where TKey : struct
+    //        {
+    //            if (expression.Body.NodeType != ExpressionType.MemberAccess)
+    //                throw new FormatException("ColumnName");
+
+    //            var body = expression.Body.ToString();
+    //            this.ColumnName = body[(body.IndexOf(".", StringComparison.Ordinal) + 1)..];
+    //            this.Value = value as object;
+    //            this.IsAndWithNextFilter = isAndWithNextFilter;
+    //            this.TypeAsd = type;
+    //            return this;
+    //        }
+
+    //    }
+
+    //    public BaseFilterModel ToBaseFilterModel()
+    //    {
+    //        var result = new BaseFilterModel
+    //        {
+    //            PagingBy = this.PagingBy,
+    //            SortBy = this.SortBy
+    //                .Select(i => new BaseFilterModel.Sort
+    //                {
+    //                    ColumnName = i.ColumnName,
+    //                    TypeAsd = i.TypeAsd
+    //                })
+    //                .ToList(),
+    //            FilterBy = this.FilterBy
+    //                .Select(i => new BaseFilterModel.Filter
+    //                {
+    //                    Value = i.Value,
+    //                    ColumnName = i.ColumnName,
+    //                    IsAndWithNextFilter = i.IsAndWithNextFilter,
+    //                    TypeString = BaseFilterModel.Filter.FilterTypeMap.First(j => j.Value == i.TypeAsd).Key
+    //                })
+    //                .ToList()
+    //        };
+    //        return result;
+    //    }
+    //}
+    #endregion
+
 }

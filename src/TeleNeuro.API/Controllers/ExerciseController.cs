@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using PlayCore.Core.Extension;
@@ -15,6 +16,7 @@ using TeleNeuro.API.Models;
 using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.ExerciseService;
+using TeleNeuro.Service.ExerciseService.Models;
 
 namespace TeleNeuro.API.Controllers
 {
@@ -36,15 +38,15 @@ namespace TeleNeuro.API.Controllers
             _userManagerService = userManagerService;
         }
         [HttpPost]
-        public async Task<BaseResponse> SearchExercises(SearchTermModel model)
+        public async Task<BaseResponse<IEnumerable<ExerciseInfo>>> SearchExercises(SearchTermModel model)
         {
-            return new BaseResponse()
+            return new BaseResponse<IEnumerable<ExerciseInfo>>()
                 .SetResult(await _exerciseService.SearchExercises(model.SearchTerm));
         }
         [HttpPost]
-        public async Task<BaseResponse> ListExercises(PageInfo pageInfo)
+        public async Task<BaseResponse<IEnumerable<ExerciseInfo>>> ListExercises(PageInfo pageInfo)
         {
-            return new BaseResponse()
+            return new BaseResponse<IEnumerable<ExerciseInfo>>()
                 .SetResult(await _exerciseService.ListExercises(pageInfo))
                 .SetTotalCount(await _exerciseService.CountExercises())
                 .SetPage(pageInfo.Page)
@@ -52,7 +54,7 @@ namespace TeleNeuro.API.Controllers
         }
         [HttpPost]
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
-        public async Task<BaseResponse> UpdateExercise([FromForm] ExerciseModel model)
+        public async Task<BaseResponse<ExerciseInfo>> UpdateExercise([FromForm] ExerciseModel model)
         {
             if (model.Id == 0 && model.File?.Length == 0)
             {
@@ -98,13 +100,13 @@ namespace TeleNeuro.API.Controllers
                     }
                 });
             }
-            return new BaseResponse().SetResult(exerciseInfo);
+            return new BaseResponse<ExerciseInfo>().SetResult(exerciseInfo);
         }
         [HttpPost]
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
-        public async Task<BaseResponse> ToggleExerciseStatus(ExerciseModel model)
+        public async Task<BaseResponse<bool>> ToggleExerciseStatus(ExerciseModel model)
         {
-            return new BaseResponse().SetResult(await _exerciseService.ToggleExerciseStatus(model.Id));
+            return new BaseResponse<bool>().SetResult(await _exerciseService.ToggleExerciseStatus(model.Id));
         }
 
     }

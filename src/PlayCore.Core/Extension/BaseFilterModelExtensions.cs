@@ -10,12 +10,12 @@ namespace PlayCore.Core.Extension
     {
         public static IQueryable<TEntity> ToQueryableFromBaseFilter<TEntity>(this IQueryable<TEntity> query, BaseFilterModel baseFilterModel, bool includeFilters = true, bool includePaging = true)
         {
-            if (baseFilterModel.SortBy is {IsValid: true})
+            if (baseFilterModel.SortBy?.Any() == true)
             {
                 string sortString = string.Join(",", baseFilterModel.ToQuerySortString());
                 query = query.OrderBy(sortString);
             }
-            if (includePaging && baseFilterModel.PagingBy is {IsValid: true})
+            if (includePaging && baseFilterModel.PagingBy is { IsValid: true })
             {
                 query = query.Skip(baseFilterModel.PagingBy.Skip).Take(baseFilterModel.PagingBy.Take);
             }
@@ -23,7 +23,7 @@ namespace PlayCore.Core.Extension
             {
                 string predicate = baseFilterModel.ToQueryFilterString();
                 if (!string.IsNullOrEmpty(predicate))
-                    query = query.Where(predicate);
+                    query = query.Where(predicate, baseFilterModel.FilterBy.Select(i => i.Value).ToArray());
             }
             return query;
         }
@@ -34,7 +34,12 @@ namespace PlayCore.Core.Extension
             StringBuilder predicateBuilder = new StringBuilder("i=>");
             for (int i = 0; baseFilterModel.FilterBy != null && i < baseFilterModel.FilterBy.Count; i++)
             {
-                switch (baseFilterModel.FilterBy[i].Type)
+                var filterType = BaseFilterModel.Filter.ToFilterType(baseFilterModel.FilterBy[i].TypeString);
+
+                if (baseFilterModel.FilterBy[i].StartsParentheses)
+                    predicateBuilder.Append("(");
+
+                switch (filterType)
                 {
                     case BaseFilterModel.FilterType.Contains: // Strings
                     case BaseFilterModel.FilterType.NotContains:
@@ -43,9 +48,8 @@ namespace PlayCore.Core.Extension
                     case BaseFilterModel.FilterType.StartsWith: // Strings
                     case BaseFilterModel.FilterType.EndWith:
                         {
-                            BaseFilterModel.FilterType type = baseFilterModel.FilterBy[i].Type.Value;
                             string functionName = string.Empty;
-                            switch (type)
+                            switch (filterType)
                             {
                                 case BaseFilterModel.FilterType.Contains:
                                     {
@@ -85,22 +89,26 @@ namespace PlayCore.Core.Extension
                                     }
 
                             }
-                            predicateBuilder.Append($"new[]{{{string.Join(",", ToNormalizeValues(baseFilterModel.FilterBy[i].Value))}}}.Any(_j_{i} => {queryOperator}i.{baseFilterModel.FilterBy[i].ColumnName}.{functionName}(_j_{i}))");
+                            predicateBuilder.Append($"{queryOperator}i.{baseFilterModel.FilterBy[i].ColumnName}.{functionName}(@{i})");
                             break;
                         }
                     case BaseFilterModel.FilterType.LessThan: // Int,Date,Double
-                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} < {baseFilterModel.FilterBy[i].Value.First()}");
+                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} < @{i}");
                         break;
                     case BaseFilterModel.FilterType.LessEqualThan: // Int,Date,Double
-                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} <= {baseFilterModel.FilterBy[i].Value.First()}");
+                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} <= @{i}");
                         break;
                     case BaseFilterModel.FilterType.GreaterThan: // Int,Date,Double
-                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} > {baseFilterModel.FilterBy[i].Value.First()}");
+                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} > @{i}");
                         break;
                     case BaseFilterModel.FilterType.GreaterEqualThan: // Int,Date,Double
-                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} >= {baseFilterModel.FilterBy[i].Value.First()}");
+                        predicateBuilder.Append($"i.{baseFilterModel.FilterBy[i].ColumnName} >= @{i}");
                         break;
                 }
+
+                if (baseFilterModel.FilterBy[i].EndParentheses)
+                    predicateBuilder.Append(")");
+
                 if (i + 1 < baseFilterModel.FilterBy.Count)
                 {
                     predicateBuilder.Append(baseFilterModel.FilterBy[i].IsAndWithNextFilter ? "&&" : "||");
@@ -110,31 +118,17 @@ namespace PlayCore.Core.Extension
             return predicateBuilder.Length > 3 ? predicateBuilder.ToString() : null;
         }
 
-        private static IEnumerable<object> ToNormalizeValues(object[] values)
-        {
-            foreach (var item in values)
-            {
-                if (item is string)
-                {
-                    yield return "\"" + item + "\"";
-                }
-                else
-                {
-                    yield return item;
-                }
-            }
-        }
         private static IEnumerable<string> ToQuerySortString(this BaseFilterModel baseFilterModel)
         {
-            for (int i = 0; i < baseFilterModel.SortBy.ColumnName.Length; i++)
+            foreach (var item in baseFilterModel.SortBy.Where(i => i.IsValid))
             {
-                switch (baseFilterModel.SortBy.Type[i])
+                switch (item.Type)
                 {
                     case BaseFilterModel.OrderType.Descending:
-                        yield return $"{baseFilterModel.SortBy.ColumnName[i]} descending";
+                        yield return $"{item.ColumnName} descending";
                         break;
                     default:
-                        yield return $"{baseFilterModel.SortBy.ColumnName[i]} ascending";
+                        yield return $"{item.ColumnName} ascending";
                         break;
                 }
             }

@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace TeleNeuro.Entities
 {
@@ -23,10 +24,13 @@ namespace TeleNeuro.Entities
         public string ContentType { get; set; }
         [Column("DIRECTORY")]
         public string Directory { get; set; }
+        [JsonIgnore]
         [Column("PATH")]
         public string Path { get; set; }
+        [JsonIgnore]
         [Column("PHYSICAL_BASE")]
         public string PhysicalBase { get; set; }
+        [JsonIgnore]
         [Column("PHYSICAL_FULL_PATH")]
         public string PhysicalFullPath { get; set; }
         [Column("HOST_BASE")]
