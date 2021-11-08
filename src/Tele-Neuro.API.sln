@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.API", "TeleNeuro.API\TeleNeuro.API.csproj", "{4A5FDDE7-EE55-4272-9407-519BDBBD794F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayCore.Core", "PlayCore.Core\PlayCore.Core.csproj", "{2DB897E3-DA08-4B6C-801D-7909E5FA1ED3}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{28A1E883-E143-4E76-9B84-42DDFE5C516D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.CategoryService", "TeleNeuro.Service.CategoryService\TeleNeuro.Service.CategoryService.csproj", "{7E70DCA9-2E37-4322-8347-306B28F7DBC1}"
@@ -35,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.ProgramSe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.UtilityService", "TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj", "{3289496C-F458-45E2-A214-88E575D54DF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleNeuro.Service.UserService", "TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj", "{7ADAE295-DF2B-4339-9481-B406D0D2C176}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.UserService", "TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj", "{7ADAE295-DF2B-4339-9481-B406D0D2C176}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayCore.Core", "PlayCore.Core\PlayCore.Core.csproj", "{5E7C250C-942C-4DE3-B14D-6EF5A7D13E1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,6 @@ Global
 		{4A5FDDE7-EE55-4272-9407-519BDBBD794F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A5FDDE7-EE55-4272-9407-519BDBBD794F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A5FDDE7-EE55-4272-9407-519BDBBD794F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DB897E3-DA08-4B6C-801D-7909E5FA1ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2DB897E3-DA08-4B6C-801D-7909E5FA1ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2DB897E3-DA08-4B6C-801D-7909E5FA1ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2DB897E3-DA08-4B6C-801D-7909E5FA1ED3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7E70DCA9-2E37-4322-8347-306B28F7DBC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7E70DCA9-2E37-4322-8347-306B28F7DBC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E70DCA9-2E37-4322-8347-306B28F7DBC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -99,6 +95,10 @@ Global
 		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7ADAE295-DF2B-4339-9481-B406D0D2C176}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E7C250C-942C-4DE3-B14D-6EF5A7D13E1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E7C250C-942C-4DE3-B14D-6EF5A7D13E1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E7C250C-942C-4DE3-B14D-6EF5A7D13E1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E7C250C-942C-4DE3-B14D-6EF5A7D13E1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
