@@ -36,10 +36,8 @@ namespace PlayCore.Core.Model
             public string ColumnName { get; set; }
             public string TypeString { get; set; }
             public object Value { get; set; }
-            public bool IsAndWithNextFilter { get; set; }
-            public bool StartsParentheses { get; set; }
-            public bool EndParentheses { get; set; }
-
+            public FilterConfig FilterConfig { get; set; }
+            public List<Filter> Children { get; set; }
             public static Dictionary<string, FilterType> FilterTypeMap = new()
             {
                 // Contains
@@ -77,6 +75,13 @@ namespace PlayCore.Core.Model
                 throw new ArgumentOutOfRangeException(nameof(TypeString));
             }
         }
+        public class FilterConfig
+        {
+            public bool IsAndNext { get; set; }
+            public bool StartsParentheses { get; set; }
+            public bool EndParentheses { get; set; }
+            public bool IsArray { get; set; }
+        }
         public enum OrderType
         {
             Ascending,
@@ -96,74 +101,4 @@ namespace PlayCore.Core.Model
             GreaterEqualThan
         }
     }
-
-    #region unsued
-    //public class BaseFilterModel<T> where T : class, new()
-    //{
-    //    public BaseFilterModel.Paging PagingBy { get; set; }
-    //    public List<Sort> SortBy { get; set; }
-    //    public List<Filter> FilterBy { get; set; }
-    //    public class Sort
-    //    {
-    //        internal string ColumnName { get; set; }
-    //        internal BaseFilterModel.OrderType TypeAsd { get; set; }
-    //        public Sort Set<TKey>(Expression<Func<T, TKey>> expression, TKey[] value, BaseFilterModel.OrderType type) where TKey : struct
-    //        {
-    //            if (expression.Body.NodeType != ExpressionType.MemberAccess)
-    //                throw new FormatException("ColumnName");
-
-    //            var body = expression.Body.ToString();
-    //            this.ColumnName = body[(body.IndexOf(".", StringComparison.Ordinal) + 1)..];
-    //            this.TypeAsd = type;
-    //            return this;
-    //        }
-    //    }
-    //    public class Filter
-    //    {
-    //        internal string ColumnName { get; set; }
-    //        internal object Value { get; set; }
-    //        internal bool IsAndWithNextFilter { get; set; }
-    //        internal BaseFilterModel.FilterType TypeAsd { get; set; }
-    //        public Filter Set<TKey>(Expression<Func<T, TKey>> expression, TKey value, BaseFilterModel.FilterType type, bool isAndWithNextFilter = false) where TKey : struct
-    //        {
-    //            if (expression.Body.NodeType != ExpressionType.MemberAccess)
-    //                throw new FormatException("ColumnName");
-
-    //            var body = expression.Body.ToString();
-    //            this.ColumnName = body[(body.IndexOf(".", StringComparison.Ordinal) + 1)..];
-    //            this.Value = value as object;
-    //            this.IsAndWithNextFilter = isAndWithNextFilter;
-    //            this.TypeAsd = type;
-    //            return this;
-    //        }
-
-    //    }
-
-    //    public BaseFilterModel ToBaseFilterModel()
-    //    {
-    //        var result = new BaseFilterModel
-    //        {
-    //            PagingBy = this.PagingBy,
-    //            SortBy = this.SortBy
-    //                .Select(i => new BaseFilterModel.Sort
-    //                {
-    //                    ColumnName = i.ColumnName,
-    //                    TypeAsd = i.TypeAsd
-    //                })
-    //                .ToList(),
-    //            FilterBy = this.FilterBy
-    //                .Select(i => new BaseFilterModel.Filter
-    //                {
-    //                    Value = i.Value,
-    //                    ColumnName = i.ColumnName,
-    //                    IsAndWithNextFilter = i.IsAndWithNextFilter,
-    //                    TypeString = BaseFilterModel.Filter.FilterTypeMap.First(j => j.Value == i.TypeAsd).Key
-    //                })
-    //                .ToList()
-    //        };
-    //        return result;
-    //    }
-    //}
-    #endregion
-
 }
