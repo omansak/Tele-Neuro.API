@@ -116,6 +116,7 @@ namespace TeleNeuro.Service.UserService
                         Password = new PasswordHasher().Hash(model.Password),
                         LastLogin = DateTime.Now,
                         CreatedDate = DateTime.Now,
+                        IsActive = true
                     });
                     if (user != null)
                     {
@@ -149,6 +150,9 @@ namespace TeleNeuro.Service.UserService
                     var userLogin = await _baseRepository.SingleOrDefaultAsync<User>(i => i.Email == model.Email);
                     if (userLogin != null && new PasswordHasher().Verify(model.Password, userLogin.Password))
                     {
+                        if (!userLogin.IsActive)
+                            throw new UIException("Kullanıcı aktif değil");
+
                         var userRoles = await _baseRepository.ListAsync<UserRoleRelation>(i => i.UserId == userLogin.Id);
                         return (userLogin, _roleDefinitions.Where(i => userRoles.Any(j => j.RoleId == i.Id)).ToList());
                     }
@@ -157,6 +161,18 @@ namespace TeleNeuro.Service.UserService
                 throw new UIException("Email & Şifre formatı hatalı");
             }
             throw new UIException("Email & Şifre boş olamaz.");
+        }
+        public async Task<bool> ToggleUserStatus(int userId)
+        {
+            var userRow = await _baseRepository.GetQueryable<User>().SingleOrDefaultAsync(i => i.Id == userId);
+            if (userRow != null)
+            {
+                userRow.IsActive = !userRow.IsActive;
+                await _baseRepository.UpdateAsync(userRow);
+                return true;
+            }
+
+            throw new UIException("Kullanıcı bulunamadi");
         }
         private IQueryable<UserInfo> GetQueryableFilterUsers(BaseFilterModel model, bool includeFilter = true, bool includePaging = true)
         {
@@ -174,7 +190,7 @@ namespace TeleNeuro.Service.UserService
                     Roles = _baseRepository
                         .GetQueryable<UserRoleRelation>()
                         .Where(j => j.UserId == i.User.Id)
-                        .Join(_baseRepository.GetQueryable<Role>(), k => k.RoleId, j => j.Id, (ik, j) => new
+                        .Join(_baseRepository.GetQueryable<Role>(), k => k.RoleId, j => j.Id, (k, j) => new
                         {
                             Role = j
                         })

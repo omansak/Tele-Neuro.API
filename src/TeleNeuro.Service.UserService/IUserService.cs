@@ -13,6 +13,7 @@ namespace TeleNeuro.Service.UserService
         Task<List<UserInfo>> ListFilterUsers(BaseFilterModel model);
         Task<int> CountFilterUsers(BaseFilterModel model);
         Task<int> UpdateUser(UserRegisterModel model);
+        Task<bool> ToggleUserStatus(int userId);
         Task<(User User, List<Role> Roles)> Login(UserLoginModel model);
     }
 }

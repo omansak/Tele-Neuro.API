@@ -31,6 +31,7 @@ namespace TeleNeuro.Entity.Context
             builder.Entity<ExercisePropertyDefinition>();
             builder.Entity<ExerciseProgramRelation>();
             builder.Entity<ExerciseProgramRelationProperty>();
+            builder.Entity<UserProgramRelation>();
         }
     }
 }

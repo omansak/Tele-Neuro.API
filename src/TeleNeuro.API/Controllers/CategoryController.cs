@@ -35,7 +35,6 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse<IEnumerable<CategoryInfo>>> ListCategories(PageInfo pageInfo)
         {
-            var asd = _userManagerService.Roles.ToList();
             return new BaseResponse<IEnumerable<CategoryInfo>>()
                 .SetResult(await _categoryService.ListCategories(pageInfo))
                 .SetTotalCount(await _categoryService.CountCategories())

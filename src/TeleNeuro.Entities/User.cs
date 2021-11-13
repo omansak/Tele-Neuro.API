@@ -24,5 +24,7 @@ namespace TeleNeuro.Entities
         public int? CreatedUser { get; set; }
         [Column("LAST_LOGIN")]
         public DateTime LastLogin { get; set; }
+        [Column("IS_ACTIVE")]
+        public bool IsActive { get; set; }
     }
 }

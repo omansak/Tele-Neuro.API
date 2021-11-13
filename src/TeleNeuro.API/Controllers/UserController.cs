@@ -4,15 +4,17 @@ using PlayCore.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using TeleNeuro.API.Attributes;
+using TeleNeuro.API.Models;
 using TeleNeuro.API.Services;
 using TeleNeuro.Service.UserService;
 using TeleNeuro.Service.UserService.Models;
 
 namespace TeleNeuro.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
     public class UserController
@@ -38,6 +40,12 @@ namespace TeleNeuro.API.Controllers
                 return new BaseResponse<int>().SetResult(await _userService.UpdateUser(model));
             }
             throw new UIException("Yetkisiz Erişim").SetResultCode(403);
+        }
+        [HttpGet]
+        [MinimumRoleAuthorize(UserRoleDefinition.Contributor)]
+        public async Task<BaseResponse<bool>> ToggleUserStatus(int id)
+        {
+            return new BaseResponse<bool>().SetResult(await _userService.ToggleUserStatus(id));
         }
         /// <remarks>BaseFilterModel FilterClause : <see cref="UserInfoQueryable"/></remarks>
         [HttpPost]
