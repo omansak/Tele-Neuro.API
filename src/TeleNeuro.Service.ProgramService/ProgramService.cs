@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.ProgramService.Models;
@@ -169,6 +168,63 @@ namespace TeleNeuro.Service.ProgramService
                 return exerciseProgramRelational.Id;
             }
             throw new UIException("Egzersiz atanamadı");
+        }
+        /// <summary>
+        /// Assign user to program
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public async Task<int> AssignUser(AssignUserModel model)
+        {
+            var user = await _baseRepository.SingleOrDefaultAsync<User>(i => i.IsActive && i.Id == model.UserId);
+            if (user == null)
+                throw new UIException("Kullanıcı bulunamadı");
+
+            var program = await _programRepository.SingleOrDefaultAsync(i => i.IsActive && i.Id == model.ProgramId);
+            if (program == null)
+                throw new UIException("Program bulunamadı");
+
+            var relational = await _baseRepository.SingleOrDefaultAsync<UserProgramRelation>(i => i.ProgramId == program.Id && i.UserId == user.Id);
+
+            if (relational != null)
+                throw new UIException("Program zaten kullanıcıya atanmı");
+
+            var programUserRelational = await _baseRepository.InsertAsync<UserProgramRelation>(new UserProgramRelation
+            {
+                CreatedDate = DateTime.Now,
+                CreatedUser = model.AssignedUserId,
+                ProgramId = program.Id,
+                UserId = user.Id
+            });
+
+            if (programUserRelational?.Id > 0)
+                return programUserRelational.Id;
+
+            throw new UIException("Program kullanıcıya atanamadı");
+        }
+        /// <summary>
+        /// Delete a relation of user of program relation
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteAssignedUser(AssignUserModel model)
+        {
+            var user = await _baseRepository.SingleOrDefaultAsync<User>(i => i.IsActive && i.Id == model.UserId);
+            if (user == null)
+                throw new UIException("Kullanıcı bulunamadı");
+
+            var program = await _programRepository.SingleOrDefaultAsync(i => i.IsActive && i.Id == model.ProgramId);
+            if (program == null)
+                throw new UIException("Program bulunamadı");
+
+            var programUserRelational = await _baseRepository.SingleOrDefaultAsync<UserProgramRelation>(i => i.ProgramId == program.Id && i.UserId == user.Id);
+
+            if (programUserRelational != null)
+            {
+                await _baseRepository.DeleteAsync(programUserRelational);
+                return true;
+            }
+            throw new UIException("Atama bulunamadı");
         }
         /// <summary>
         /// Return Exercises of Program
