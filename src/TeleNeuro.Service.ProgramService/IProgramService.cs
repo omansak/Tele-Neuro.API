@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PlayCore.Core.Model;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlayCore.Core.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.ProgramService.Models;
 
@@ -64,6 +64,11 @@ namespace TeleNeuro.Service.ProgramService
         Task<bool> DeleteAssignedUser(AssignUserModel model);
 
         /// <summary>
+        /// List assigned users of program
+        /// </summary>
+        Task<(List<AssignedProgramUserInfo>, int)> ListAssignedUsers(AssignedProgramUsersModel model);
+
+        /// <summary>
         /// Return Exercises of Program
         /// </summary>
         Task<List<ProgramAssignedExerciseInfo>> AssignedExercises(int programId, bool? isActiveExercise = null);
@@ -76,6 +81,9 @@ namespace TeleNeuro.Service.ProgramService
         /// <returns></returns>
         Task<bool> ChangeSequenceAssignedExercise(int relationId, int direction);
 
+        /// <summary>
+        /// Delete a assigned exercise of program
+        /// </summary>
         Task<bool> DeleteAssignedExercise(int relationId);
     }
 }

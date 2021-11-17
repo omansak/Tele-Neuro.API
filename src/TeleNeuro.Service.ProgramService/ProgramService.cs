@@ -187,7 +187,7 @@ namespace TeleNeuro.Service.ProgramService
             var relational = await _baseRepository.SingleOrDefaultAsync<UserProgramRelation>(i => i.ProgramId == program.Id && i.UserId == user.Id);
 
             if (relational != null)
-                throw new UIException("Program zaten kullanıcıya atanmı");
+                throw new UIException("Program zaten kullanıcıya atanmış");
 
             var programUserRelational = await _baseRepository.InsertAsync<UserProgramRelation>(new UserProgramRelation
             {
@@ -225,6 +225,44 @@ namespace TeleNeuro.Service.ProgramService
                 return true;
             }
             throw new UIException("Atama bulunamadı");
+        }
+        /// <summary>
+        /// List assigned users of program
+        /// </summary>
+        public async Task<(List<AssignedProgramUserInfo>, int)> ListAssignedUsers(AssignedProgramUsersModel model)
+        {
+            var programRow = await _programRepository.SingleOrDefaultAsync(i => i.Id == model.ProgramId);
+            if (programRow != null)
+            {
+                var query = _baseRepository
+                    .GetQueryable<UserProgramRelation>()
+                    .Join(_baseRepository.GetQueryable<User>(), i => i.UserId, j => j.Id, (i, j) => new
+                    {
+                        User = j,
+                        Relation = i
+                    })
+                    .Join(_baseRepository.GetQueryable<UserProfile>(), i => i.User.Id, j => j.UserId, (i, j) => new
+                    {
+                        User = i.User,
+                        Relation = i.Relation,
+                        UserProfile = j
+                    })
+                    .Where(i => i.Relation.ProgramId == programRow.Id);
+
+                var resultQuery = query
+                    .Skip((model.PageInfo.Page - 1) * model.PageInfo.PageSize)
+                    .Take(model.PageInfo.PageSize)
+                    .Select(i => new AssignedProgramUserInfo
+                    {
+                        UserId = i.User.Id,
+                        Name = i.UserProfile.Name,
+                        Surname = i.UserProfile.Surname,
+                        Email = i.User.Email,
+                        RelationId = i.Relation.Id
+                    });
+                return (await resultQuery.ToListAsync(), await query.CountAsync());
+            }
+            throw new UIException("Program bulunamadı");
         }
         /// <summary>
         /// Return Exercises of Program
@@ -347,7 +385,9 @@ namespace TeleNeuro.Service.ProgramService
 
             throw new UIException("Yön geçersiz");
         }
-
+        /// <summary>
+        /// Delete a assigned exercise of program
+        /// </summary>
         public async Task<bool> DeleteAssignedExercise(int relationId)
         {
             var relationRow = await _baseRepository.FirstOrDefaultAsync<ExerciseProgramRelation>(i => i.Id == relationId);

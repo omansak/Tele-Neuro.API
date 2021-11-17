@@ -25,6 +25,12 @@ namespace TeleNeuro.API.Controllers
             _programService = programService;
             _userManagerService = userManagerService;
         }
+        [HttpGet("{programId}")]
+        public async Task<BaseResponse<ProgramInfo>> ProgramInfo(int programId)
+        {
+            return new BaseResponse<ProgramInfo>()
+                .SetResult(await _programService.GetProgram(programId));
+        }
         [HttpPost]
         public async Task<BaseResponse<IEnumerable<ProgramInfo>>> ListPrograms(PageInfo pageInfo)
         {
@@ -68,7 +74,7 @@ namespace TeleNeuro.API.Controllers
         [HttpPost]
         public async Task<BaseResponse<bool>> DeleteAssignedUser(AssignUserModel model)
         {
-            model.UserId = _userManagerService.UserId;
+            model.AssignedUserId = _userManagerService.UserId;
             return new BaseResponse<bool>().SetResult(await _programService.DeleteAssignedUser(model));
         }
         [HttpPost]
@@ -85,6 +91,16 @@ namespace TeleNeuro.API.Controllers
         public async Task<BaseResponse<bool>> DeleteAssignedExercise([FromBody] int relationId)
         {
             return new BaseResponse<bool>().SetResult(await _programService.DeleteAssignedExercise(relationId));
+        }
+        [HttpPost]
+        public async Task<BaseResponse<List<AssignedProgramUserInfo>>> ListAssignedUsers(AssignedProgramUsersModel model)
+        {
+            var (result, count) = await _programService.ListAssignedUsers(model);
+            return new BaseResponse<List<AssignedProgramUserInfo>>()
+                .SetResult(result)
+                .SetTotalCount(count)
+                .SetPage(model.PageInfo.Page)
+                .SetPageSize(model.PageInfo.PageSize);
         }
     }
 }
