@@ -93,7 +93,7 @@ namespace TeleNeuro.API.Controllers
             return new BaseResponse<bool>().SetResult(await _programService.DeleteAssignedExercise(relationId));
         }
         [HttpPost]
-        public async Task<BaseResponse<List<AssignedProgramUserInfo>>> ListAssignedUsers(AssignedProgramUsersModel model)
+        public async Task<BaseResponse<List<AssignedProgramUserInfo>>> ListAssignedUsers(AssignedProgramUserModel model)
         {
             var (result, count) = await _programService.ListAssignedUsers(model);
             return new BaseResponse<List<AssignedProgramUserInfo>>()

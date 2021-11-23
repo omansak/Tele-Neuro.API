@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using TeleNeuro.API.Services;
 using TeleNeuro.Service.ExerciseService;
 using TeleNeuro.Service.ExerciseService.Models;
 using TeleNeuro.Service.ProgramService;
@@ -18,11 +18,13 @@ namespace TeleNeuro.API.Controllers
     {
         private readonly IProgramService _programService;
         private readonly IExerciseService _exerciseService;
+        private readonly IUserManagerService _userManagerService;
 
-        public ContentController(IProgramService programService, IExerciseService exerciseService)
+        public ContentController(IProgramService programService, IExerciseService exerciseService, IUserManagerService userManagerService)
         {
             _programService = programService;
             _exerciseService = exerciseService;
+            _userManagerService = userManagerService;
         }
 
         [HttpGet("{programId}")]
@@ -42,6 +44,20 @@ namespace TeleNeuro.API.Controllers
         {
             return new BaseResponse<ExerciseInfo>()
                 .SetResult(await _exerciseService.GetActiveExercise(exerciseId));
+        }
+        [HttpPost]
+        public async Task<BaseResponse<List<AssignedProgramOfUserInfo>>> SelfAssignedPrograms(PageInfo pageInfo)
+        {
+            var (result, count) = await _programService.ListAssignedPrograms(new AssignedProgramOfUserModel
+            {
+                PageInfo = pageInfo,
+                UserId = _userManagerService.UserId
+            });
+            return new BaseResponse<List<AssignedProgramOfUserInfo>>()
+                .SetResult(result)
+                .SetTotalCount(count)
+                .SetPage(pageInfo.Page)
+                .SetPageSize(pageInfo.PageSize);
         }
     }
 }

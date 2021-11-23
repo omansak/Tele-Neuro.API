@@ -2,9 +2,9 @@
 
 namespace TeleNeuro.Service.ProgramService.Models
 {
-    public class AssignedProgramUsersModel
+    public class AssignedProgramOfUserModel
     {
-        public int ProgramId { get; set; }
+        public int UserId { get; set; }
         public PageInfo PageInfo { get; set; }
     }
 }

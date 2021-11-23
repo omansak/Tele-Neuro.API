@@ -229,7 +229,7 @@ namespace TeleNeuro.Service.ProgramService
         /// <summary>
         /// List assigned users of program
         /// </summary>
-        public async Task<(List<AssignedProgramUserInfo>, int)> ListAssignedUsers(AssignedProgramUsersModel model)
+        public async Task<(List<AssignedProgramUserInfo>, int)> ListAssignedUsers(AssignedProgramUserModel model)
         {
             var programRow = await _programRepository.SingleOrDefaultAsync(i => i.Id == model.ProgramId);
             if (programRow != null)
@@ -263,6 +263,44 @@ namespace TeleNeuro.Service.ProgramService
                 return (await resultQuery.ToListAsync(), await query.CountAsync());
             }
             throw new UIException("Program bulunamadı");
+        }
+        /// <summary>
+        /// List assigned programs of users
+        /// </summary>
+        public async Task<(List<AssignedProgramOfUserInfo>, int)> ListAssignedPrograms(AssignedProgramOfUserModel model)
+        {
+            var userRow = await _baseRepository.GetQueryable<User>().SingleOrDefaultAsync(i => i.Id == model.UserId);
+            if (userRow != null)
+            {
+                var query = _baseRepository
+                    .GetQueryable<UserProgramRelation>()
+                    .Join(_programRepository.GetQueryable(), i => i.ProgramId, j => j.Id, (i, j) => new
+                    {
+                        Relation = i,
+                        Program = j
+                    })
+                    .Join(_baseRepository.GetQueryable<Category>(), i => i.Program.CategoryId, j => j.Id, (i, j) => new
+                    {
+                        Relation = i.Relation,
+                        Program = i.Program,
+                        Category = j
+                    })
+                    .Where(i => i.Relation.UserId == userRow.Id && i.Category.IsActive && i.Program.IsActive);
+
+                var resultQuery = query
+                    .Skip((model.PageInfo.Page - 1) * model.PageInfo.PageSize)
+                    .Take(model.PageInfo.PageSize)
+                    .Select(i => new AssignedProgramOfUserInfo
+                    {
+                        ProgramId = i.Program.Id,
+                        ProgramName = i.Program.Name,
+                        CategoryName = i.Category.Name,
+                        AssignDate = i.Relation.CreatedDate
+                    });
+
+                return (await resultQuery.ToListAsync(), await query.CountAsync());
+            }
+            throw new UIException("Kullanıcı bulunamadı");
         }
         /// <summary>
         /// Return Exercises of Program

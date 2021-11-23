@@ -1,11 +1,9 @@
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PlayCore.Core.Extension;
 using PlayCore.Core.Model;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Model;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TeleNeuro.API.Attributes;
 using TeleNeuro.API.Models;
@@ -19,7 +17,6 @@ namespace TeleNeuro.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
-    [MinimumRoleAuthorize(UserRoleDefinition.Contributor)]
     public class CategoryController
     {
         private readonly ICategoryService _categoryService;
@@ -42,6 +39,7 @@ namespace TeleNeuro.API.Controllers
                 .SetPageSize(pageInfo.PageSize);
         }
         [HttpPost]
+        [MinimumRoleAuthorize(UserRoleDefinition.Subscriber)]
         public async Task<BaseResponse<IEnumerable<CategoryInfo>>> ListActiveCategories(PageInfo pageInfo)
         {
             return new BaseResponse<IEnumerable<CategoryInfo>>()

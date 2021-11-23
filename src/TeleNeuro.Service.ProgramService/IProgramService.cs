@@ -1,6 +1,6 @@
-﻿using PlayCore.Core.Model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlayCore.Core.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.ProgramService.Models;
 
@@ -66,7 +66,12 @@ namespace TeleNeuro.Service.ProgramService
         /// <summary>
         /// List assigned users of program
         /// </summary>
-        Task<(List<AssignedProgramUserInfo>, int)> ListAssignedUsers(AssignedProgramUsersModel model);
+        Task<(List<AssignedProgramUserInfo>, int)> ListAssignedUsers(AssignedProgramUserModel model);
+
+        /// <summary>
+        /// List assigned programs of users
+        /// </summary>
+        Task<(List<AssignedProgramOfUserInfo>, int)> ListAssignedPrograms(AssignedProgramOfUserModel model);
 
         /// <summary>
         /// Return Exercises of Program
