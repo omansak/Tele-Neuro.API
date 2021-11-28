@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PlayCore.Core.Model;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using PlayCore.Core.Extension;
-using PlayCore.Core.Model;
+using TeleNeuro.API.Attributes;
+using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Service.UserService;
 using TeleNeuro.Service.UtilityService;
@@ -14,6 +15,7 @@ namespace TeleNeuro.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [MinimumRoleAuthorize(UserRoleDefinition.Subscriber)]
     public class UtilityController
     {
         private readonly IUtilityService _utilityService;

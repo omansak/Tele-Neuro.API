@@ -294,6 +294,15 @@ namespace TeleNeuro.Service.ProgramService
                     {
                         ProgramId = i.Program.Id,
                         ProgramName = i.Program.Name,
+                        ExerciseCount = _baseRepository.GetQueryable<ExerciseProgramRelation>().Count(j => j.ProgramId == i.Program.Id),
+                        CompletedExercisesCount = _baseRepository
+                            .GetQueryable<RelationStatLog>()
+                            .Where(j => j.ProgramId == i.Program.Id &&
+                                        j.UserId == userRow.Id &&
+                                        new[] { "EXERCISE_ENDED", "EXERCISE_OPENED" }.Contains(j.ActionKey))
+                            .Select(j => j.ExerciseProgramRelationId)
+                            .Distinct()
+                            .Count(),
                         CategoryName = i.Category.Name,
                         AssignDate = i.Relation.CreatedDate
                     });

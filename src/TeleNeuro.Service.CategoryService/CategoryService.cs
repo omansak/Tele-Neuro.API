@@ -17,11 +17,13 @@ namespace TeleNeuro.Service.CategoryService
     {
         private readonly IBaseRepository<Category, TeleNeuroDatabaseContext> _categoryRepository;
         private readonly IBaseRepository<Document, TeleNeuroDatabaseContext> _documentRepository;
+        private readonly IBaseRepository<Program, TeleNeuroDatabaseContext> _programRepository;
 
-        public CategoryService(IBaseRepository<Category, TeleNeuroDatabaseContext> categoryRepository, IBaseRepository<Document, TeleNeuroDatabaseContext> documentRepository)
+        public CategoryService(IBaseRepository<Category, TeleNeuroDatabaseContext> categoryRepository, IBaseRepository<Document, TeleNeuroDatabaseContext> documentRepository, IBaseRepository<Program, TeleNeuroDatabaseContext> programRepository)
         {
             _categoryRepository = categoryRepository;
             _documentRepository = documentRepository;
+            _programRepository = programRepository;
         }
         /// <summary>
         /// Returns Categories
@@ -149,7 +151,8 @@ namespace TeleNeuro.Service.CategoryService
                .Join(_documentRepository.GetQueryable(), i => i.DocumentGuid, j => j.Guid, (i, j) => new CategoryInfo
                {
                    Category = i,
-                   Document = j
+                   Document = j,
+                   ProgramCount = _programRepository.GetQueryable().Count(k => k.CategoryId == i.Id)
                });
 
             if (pageInfo != null && pageInfo.Page > -1 && pageInfo.PageSize > 0)
