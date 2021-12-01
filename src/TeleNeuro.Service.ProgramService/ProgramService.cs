@@ -45,6 +45,46 @@ namespace TeleNeuro.Service.ProgramService
                 .CountAsync();
         }
         /// <summary>
+        /// Returns programs by category Id that has been public or assigned to user Id
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ProgramInfo>> ListUserAssignedPrograms(int categoryId, PageInfo pageInfo = null, int? assignedUserId = null)
+        {
+            return await GetQueryableProgram(
+                    (i) =>
+                        i.IsActive && i.CategoryId == categoryId &&
+                        (i.IsPublic ||
+                         assignedUserId == null ||
+                         _baseRepository
+                             .GetQueryable<UserProgramRelation>()
+                             .Where(j => j.UserId == assignedUserId)
+                             .Select(j => j.ProgramId)
+                             .Distinct()
+                             .Contains(i.Id)),
+                    pageInfo: pageInfo)
+                .ToListAsync();
+        }
+        /// <summary>
+        /// Returns count of programs by category Id that has been public or assigned to user Id
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> CountUserAssignedPrograms(int categoryId, int? assignedUserId = null)
+        {
+            return await GetQueryableProgram(
+                    (i) =>
+                        i.IsActive && i.CategoryId == categoryId &&
+                        (i.IsPublic ||
+                         assignedUserId == null ||
+                         _baseRepository
+                             .GetQueryable<UserProgramRelation>()
+                             .Where(j => j.UserId == assignedUserId)
+                             .Select(j => j.ProgramId)
+                             .Distinct()
+                             .Contains(i.Id)))
+                .CountAsync();
+        }
+
+        /// <summary>
         /// Returns ProgramInfo
         /// </summary>
         /// <param name="id"></param>

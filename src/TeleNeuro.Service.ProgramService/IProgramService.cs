@@ -22,6 +22,18 @@ namespace TeleNeuro.Service.ProgramService
         Task<int> CountPrograms();
 
         /// <summary>
+        /// Returns programs by category Id that has been public or assigned to user Id
+        /// </summary>
+        /// <returns></returns>
+        Task<List<ProgramInfo>> ListUserAssignedPrograms(int categoryId, PageInfo pageInfo = null, int? assignedUserId = null);
+
+        /// <summary>
+        /// Returns count of programs by category Id that has been public or assigned to user Id
+        /// </summary>
+        /// <returns></returns>
+        Task<int> CountUserAssignedPrograms(int categoryId, int? assignedUserId = null);
+
+        /// <summary>
         /// Returns ProgramInfo
         /// </summary>
         /// <param name="id"></param>

@@ -32,13 +32,9 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse<IEnumerable<CategoryInfo>>> ListCategories(PageInfo pageInfo)
         {
-            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
-                ? null
-                : _userManagerService.UserId;
-
             return new BaseResponse<IEnumerable<CategoryInfo>>()
-                .SetResult(await _categoryService.ListCategories(pageInfo, userId))
-                .SetTotalCount(await _categoryService.CountCategories(userId))
+                .SetResult(await _categoryService.ListCategories(pageInfo))
+                .SetTotalCount(await _categoryService.CountCategories())
                 .SetPage(pageInfo.Page)
                 .SetPageSize(pageInfo.PageSize);
         }
@@ -56,6 +52,18 @@ namespace TeleNeuro.API.Controllers
                 .SetPage(pageInfo.Page)
                 .SetPageSize(pageInfo.PageSize);
         }
+        [HttpGet("{categoryId}")]
+        [MinimumRoleAuthorize(UserRoleDefinition.Subscriber)]
+        public async Task<BaseResponse<CategoryInfo>> GetCategory(int categoryId)
+        {
+            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+                ? null
+                : _userManagerService.UserId;
+
+            return new BaseResponse<CategoryInfo>()
+                .SetResult(await _categoryService.GetCategory(categoryId, userId));
+        }
+
         [HttpPost]
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse<CategoryInfo>> UpdateCategory([FromForm] CategoryModel model)

@@ -25,12 +25,14 @@ namespace TeleNeuro.API.Controllers
             _programService = programService;
             _userManagerService = userManagerService;
         }
+
         [HttpGet("{programId}")]
         public async Task<BaseResponse<ProgramInfo>> ProgramInfo(int programId)
         {
             return new BaseResponse<ProgramInfo>()
                 .SetResult(await _programService.GetProgram(programId));
         }
+
         [HttpPost]
         public async Task<BaseResponse<IEnumerable<ProgramInfo>>> ListPrograms(PageInfo pageInfo)
         {
@@ -40,6 +42,21 @@ namespace TeleNeuro.API.Controllers
                 .SetPage(pageInfo.Page)
                 .SetPageSize(pageInfo.PageSize);
         }
+
+        [HttpPost("{categoryId}")]
+        public async Task<BaseResponse<IEnumerable<ProgramInfo>>> ListProgramsByCategory(int categoryId, PageInfo pageInfo)
+        {
+            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+                ? null
+                : _userManagerService.UserId;
+
+            return new BaseResponse<IEnumerable<ProgramInfo>>()
+                .SetResult(await _programService.ListUserAssignedPrograms(categoryId, pageInfo, userId))
+                .SetTotalCount(await _programService.CountUserAssignedPrograms(categoryId, userId))
+                .SetPage(pageInfo.Page)
+                .SetPageSize(pageInfo.PageSize); ;
+        }
+
         [HttpPost]
         public async Task<BaseResponse<ProgramInfo>> UpdateProgram(ProgramModel model)
         {
@@ -54,23 +71,27 @@ namespace TeleNeuro.API.Controllers
                 CreatedUser = _userManagerService.UserId
             }));
         }
+
         [HttpPost]
         public async Task<BaseResponse<bool>> ToggleProgramStatus([FromBody] int id)
         {
             return new BaseResponse<bool>().SetResult(await _programService.ToggleProgramStatus(id));
         }
+
         [HttpPost]
         public async Task<BaseResponse<int>> AssignExercise(AssignExerciseModel model)
         {
             model.UserId = _userManagerService.UserId;
             return new BaseResponse<int>().SetResult(await _programService.AssignExercise(model));
         }
+
         [HttpPost]
         public async Task<BaseResponse<int>> AssignUser(AssignUserModel model)
         {
             model.AssignedUserId = _userManagerService.UserId;
             return new BaseResponse<int>().SetResult(await _programService.AssignUser(model));
         }
+
         [HttpPost]
         public async Task<BaseResponse<bool>> DeleteAssignedUser(AssignUserModel model)
         {
@@ -82,16 +103,19 @@ namespace TeleNeuro.API.Controllers
         {
             return new BaseResponse<IEnumerable<ProgramAssignedExerciseInfo>>().SetResult(await _programService.AssignedExercises(programId));
         }
+
         [HttpPost]
         public async Task<BaseResponse<bool>> ChangeSequenceAssignedExercise(ChangeSequenceModel model)
         {
             return new BaseResponse<bool>().SetResult(await _programService.ChangeSequenceAssignedExercise(model.Id, model.Direction));
         }
+
         [HttpPost]
         public async Task<BaseResponse<bool>> DeleteAssignedExercise([FromBody] int relationId)
         {
             return new BaseResponse<bool>().SetResult(await _programService.DeleteAssignedExercise(relationId));
         }
+
         [HttpPost]
         public async Task<BaseResponse<List<AssignedProgramUserInfo>>> ListAssignedUsers(AssignedProgramUserModel model)
         {
