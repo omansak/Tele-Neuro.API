@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlayCore.Core.CustomException;
+using PlayCore.Core.Model;
 using PlayCore.Core.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using PlayCore.Core.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService.Models;
@@ -18,57 +18,61 @@ namespace TeleNeuro.Service.CategoryService
         private readonly IBaseRepository<Category, TeleNeuroDatabaseContext> _categoryRepository;
         private readonly IBaseRepository<Document, TeleNeuroDatabaseContext> _documentRepository;
         private readonly IBaseRepository<Program, TeleNeuroDatabaseContext> _programRepository;
+        private readonly IBaseRepository<TeleNeuroDatabaseContext> _baseRepository;
 
-        public CategoryService(IBaseRepository<Category, TeleNeuroDatabaseContext> categoryRepository, IBaseRepository<Document, TeleNeuroDatabaseContext> documentRepository, IBaseRepository<Program, TeleNeuroDatabaseContext> programRepository)
+        public CategoryService(IBaseRepository<Category, TeleNeuroDatabaseContext> categoryRepository, IBaseRepository<Document, TeleNeuroDatabaseContext> documentRepository, IBaseRepository<Program, TeleNeuroDatabaseContext> programRepository, IBaseRepository<TeleNeuroDatabaseContext> baseRepository)
         {
             _categoryRepository = categoryRepository;
             _documentRepository = documentRepository;
             _programRepository = programRepository;
+            _baseRepository = baseRepository;
         }
         /// <summary>
         /// Returns Categories
         /// </summary>
         /// <returns></returns>
-        public async Task<List<CategoryInfo>> ListCategories(PageInfo pageInfo = null)
+        public async Task<List<CategoryInfo>> ListCategories(PageInfo pageInfo = null, int? assignedUserId = null)
         {
-            return await GetQueryableCategory(pageInfo: pageInfo)
+            return await GetQueryableCategory(pageInfo: pageInfo, assignedUserId: assignedUserId)
                 .ToListAsync();
         }
         /// <summary>
         /// Returns Active Categories
         /// </summary>
         /// <returns></returns>
-        public async Task<List<CategoryInfo>> ListActiveCategories(PageInfo pageInfo = null)
+        public async Task<List<CategoryInfo>> ListActiveCategories(PageInfo pageInfo = null, int? assignedUserId = null)
         {
-            return await GetQueryableCategory(i => i.IsActive, pageInfo: pageInfo)
+            return await GetQueryableCategory(i => i.IsActive, pageInfo: pageInfo, assignedUserId: assignedUserId)
                 .ToListAsync();
         }
         /// <summary>
         /// Returns Active Categories count
         /// </summary>
         /// <returns></returns>
-        public async Task<int> CountActiveCategories()
+        public async Task<int> CountActiveCategories(int? assignedUserId = null)
         {
-            return await GetQueryableCategory(i => i.IsActive)
+            return await GetQueryableCategory(i => i.IsActive, assignedUserId: assignedUserId)
                 .CountAsync();
         }
         /// <summary>
         /// Returns Categories count
         /// </summary>
         /// <returns></returns>
-        public async Task<int> CountCategories()
+        public async Task<int> CountCategories(int? assignedUserId = null)
         {
-            return await GetQueryableCategory()
+            return await GetQueryableCategory(assignedUserId: assignedUserId)
                 .CountAsync();
         }
+
         /// <summary>
         /// Returns CategoryInfo
         /// </summary>
         /// <param name="id">Category's Id</param>
+        /// <param name="assignedUserId">User Id</param>
         /// <returns></returns>
-        public async Task<CategoryInfo> GetCategory(int id)
+        public async Task<CategoryInfo> GetCategory(int id, int? assignedUserId = null)
         {
-            return await GetQueryableCategory(i => i.Id == id)
+            return await GetQueryableCategory(i => i.Id == id, assignedUserId: assignedUserId)
                 .SingleOrDefaultAsync();
         }
         /// <summary>
@@ -132,12 +136,12 @@ namespace TeleNeuro.Service.CategoryService
 
             throw new UIException("Kategori bulunamadi");
         }
+
         /// <summary>
         /// Returns CategoryInfo Queryable
         /// </summary>
-        /// <param name="expression"></param>
         /// <returns></returns>
-        private IQueryable<CategoryInfo> GetQueryableCategory(Expression<Func<Category, bool>> expression = null, PageInfo pageInfo = null)
+        private IQueryable<CategoryInfo> GetQueryableCategory(Expression<Func<Category, bool>> expression = null, PageInfo pageInfo = null, int? assignedUserId = null)
         {
             var query = _categoryRepository.GetQueryable().AsQueryable();
             if (expression != null)
@@ -152,7 +156,11 @@ namespace TeleNeuro.Service.CategoryService
                {
                    Category = i,
                    Document = j,
-                   ProgramCount = _programRepository.GetQueryable().Count(k => k.CategoryId == i.Id)
+                   ProgramCount = _programRepository
+                       .GetQueryable()
+                       .Where(k => k.IsActive)
+                       .Where(k => k.IsPublic || assignedUserId == null || _baseRepository.GetQueryable<UserProgramRelation>().Where(l => l.UserId == 4).Select(l => l.ProgramId).Contains(k.Id))
+                       .Count(k => k.CategoryId == i.Id)
                });
 
             if (pageInfo != null && pageInfo.Page > -1 && pageInfo.PageSize > 0)

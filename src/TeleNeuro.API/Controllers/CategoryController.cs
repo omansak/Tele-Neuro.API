@@ -32,9 +32,13 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Editor)]
         public async Task<BaseResponse<IEnumerable<CategoryInfo>>> ListCategories(PageInfo pageInfo)
         {
+            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+                ? null
+                : _userManagerService.UserId;
+
             return new BaseResponse<IEnumerable<CategoryInfo>>()
-                .SetResult(await _categoryService.ListCategories(pageInfo))
-                .SetTotalCount(await _categoryService.CountCategories())
+                .SetResult(await _categoryService.ListCategories(pageInfo, userId))
+                .SetTotalCount(await _categoryService.CountCategories(userId))
                 .SetPage(pageInfo.Page)
                 .SetPageSize(pageInfo.PageSize);
         }
@@ -42,9 +46,13 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Subscriber)]
         public async Task<BaseResponse<IEnumerable<CategoryInfo>>> ListActiveCategories(PageInfo pageInfo)
         {
+            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+                ? null
+                : _userManagerService.UserId;
+
             return new BaseResponse<IEnumerable<CategoryInfo>>()
-                .SetResult(await _categoryService.ListActiveCategories(pageInfo))
-                .SetTotalCount(await _categoryService.CountActiveCategories())
+                .SetResult(await _categoryService.ListActiveCategories(pageInfo, userId))
+                .SetTotalCount(await _categoryService.CountActiveCategories(userId))
                 .SetPage(pageInfo.Page)
                 .SetPageSize(pageInfo.PageSize);
         }

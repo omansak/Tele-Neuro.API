@@ -77,5 +77,18 @@ namespace TeleNeuro.API.Services
             }
         }
 
+        public bool CheckMinumumRole(string role)
+        {
+            if (Roles.Any())
+            {
+                var userMaxRole = Startup.RoleDefinitions.Where(i => Roles.Contains(i.Key)).OrderBy(i => i.Priority).FirstOrDefault();
+                var requirementRole = Startup.RoleDefinitions.FirstOrDefault(i => i.Key == role);
+                if (requirementRole != null && userMaxRole != null && requirementRole.Priority >= userMaxRole.Priority)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
