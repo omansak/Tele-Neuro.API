@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using PlayCore.Core.CustomException;
+using PlayCore.Core.Logger;
 using PlayCore.Core.Managers.JWTAuthenticationManager;
 using PlayCore.Core.Model;
 using System.Collections.Generic;
@@ -21,16 +22,19 @@ namespace TeleNeuro.API.Controllers
         private readonly IUserService _userService;
         private readonly IUserManagerService _userManagerService;
         private readonly IJWTAuthenticationManager _jwtAuthenticationManager;
+        private readonly IBasicLogger<IUserService> _basicLogger;
 
-        public LoginController(IUserService userService, IJWTAuthenticationManager jwtAuthenticationManager, IUserManagerService userManagerService)
+        public LoginController(IUserService userService, IJWTAuthenticationManager jwtAuthenticationManager, IUserManagerService userManagerService, IBasicLogger<IUserService> basicLogger)
         {
             _userService = userService;
             _jwtAuthenticationManager = jwtAuthenticationManager;
             _userManagerService = userManagerService;
+            _basicLogger = basicLogger;
         }
         [HttpPost]
         public async Task<BaseResponse<JWTTokenResult>> Login(UserLoginModel model)
         {
+            _basicLogger.LogInfo("User Login", model);
             var (user, roles) = await _userService.Login(model);
             if (user != null)
             {

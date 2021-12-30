@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -5,9 +6,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PlayCore.Core.CustomException;
 using PlayCore.Core.Extension;
+using PlayCore.Core.Logger;
+using PlayCore.Core.Managers.JWTAuthenticationManager;
+using PlayCore.Core.QueuedHostedService;
+using Service.Document.DocumentServiceSelector;
 using Service.Document.Image.ImageSharp;
+using Service.Document.Video.Vimeo;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
@@ -15,14 +23,7 @@ using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using PlayCore.Core.Logger;
-using PlayCore.Core.Managers.JWTAuthenticationManager;
-using PlayCore.Core.QueuedHostedService;
-using Service.Document.DocumentServiceSelector;
-using Service.Document.Video.Vimeo;
+using TeleNeuro.API.Controllers;
 using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
@@ -30,7 +31,6 @@ using TeleNeuro.Service.CategoryService;
 using TeleNeuro.Service.ExerciseService;
 using TeleNeuro.Service.ProgramService;
 using TeleNeuro.Service.UserService;
-using TeleNeuro.Service.UserService.Models;
 using TeleNeuro.Service.UtilityService;
 using VimeoDotNet.Exceptions;
 
@@ -166,6 +166,7 @@ namespace TeleNeuro.API
             // Loggers
             services.AddBasicLogger();
             services.AddSpecificBasicLogger<QueuedHostedService>(nameof(QueuedHostedService));
+            services.AddSpecificBasicLogger<IUserService>(nameof(UserService));
             // BackgroundService
             services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
@@ -201,11 +202,22 @@ namespace TeleNeuro.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TeleNeuro.API v1"));
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TeleNeuro.API v1"));
+
+            // Initial Logs
+            IBasicLogger logger = (IBasicLogger)app.ApplicationServices.GetService(typeof(IBasicLogger));
+            if (logger is not null)
+            {
+                logger.LogInfo("WebHostEnvironment.WebRootPath:", WebHostEnvironment.WebRootPath);
+                logger.LogInfo("env.IsDevelopment():", env.IsDevelopment());
+            }
+
             // Init 
             RoleDefinitions = userService.RoleDefinition;
+
             // Static Files
             app.UseImageSharp();
             app.UseStaticFiles(new StaticFileOptions
@@ -220,20 +232,22 @@ namespace TeleNeuro.API
 
             app.UseGlobalExceptionHandler(i =>
             {
-                if (i is SixLabors.ImageSharp.ImageProcessingException || i is SixLabors.ImageSharp.ImageFormatException)
+                if (i is not UIException)
                 {
                     string guid = Guid.NewGuid().ToString();
-                    return new Exception($"Döküman yüklerken bir hata meydana geldi (IMAGE).\n\nGUID : {guid}", i);
-                }
-                if (i is VimeoApiException)
-                {
-                    string guid = Guid.NewGuid().ToString();
-                    return new Exception($"Döküman yüklerken bir hata meydana geldi (VIDEO).\n\nGUID : {guid}", i);
-                }
-                if (i is DbException)
-                {
-                    string guid = Guid.NewGuid().ToString();
-                    return new Exception($"Veritabaný üzerinde hata meydana geldi.\n\nGUID : {guid}", i);
+                    logger?.LogException("--------UNHANDLED EXCEPTION--------", i);
+                    if (i is SixLabors.ImageSharp.ImageProcessingException || i is SixLabors.ImageSharp.ImageFormatException)
+                    {
+                        return new Exception($"Döküman yüklerken bir hata meydana geldi (IMAGE).\n\nGUID : {guid}", i);
+                    }
+                    if (i is VimeoApiException)
+                    {
+                        return new Exception($"Döküman yüklerken bir hata meydana geldi (VIDEO).\n\nGUID : {guid}", i);
+                    }
+                    if (i is DbException)
+                    {
+                        return new Exception($"Veritabaný üzerinde hata meydana geldi.\n\nGUID : {guid}", i);
+                    }
                 }
                 return i;
             });

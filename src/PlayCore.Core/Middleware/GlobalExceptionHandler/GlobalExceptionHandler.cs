@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using PlayCore.Core.CustomException;
 using PlayCore.Core.Extension;
 using PlayCore.Core.LocalizationString;
 using PlayCore.Core.Model;
@@ -43,10 +42,6 @@ namespace PlayCore.Core.Middleware.GlobalExceptionHandler
             try
             {
                 await _next(context);
-            }
-            catch (UIException ex)
-            {
-                await this.ErrorResponse(context, ex);
             }
             catch (Exception ex)
             {
