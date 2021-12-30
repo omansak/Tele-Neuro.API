@@ -23,7 +23,6 @@ using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using TeleNeuro.API.Controllers;
 using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
@@ -203,16 +202,17 @@ namespace TeleNeuro.API
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            // TODO Remove
+            app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TeleNeuro.API v1"));
 
-            // Initial Logs
+            //Initial Logs
             IBasicLogger logger = (IBasicLogger)app.ApplicationServices.GetService(typeof(IBasicLogger));
-            if (logger is not null)
+            if (logger != null)
             {
-                logger.LogInfo("WebHostEnvironment.WebRootPath:", WebHostEnvironment.WebRootPath);
-                logger.LogInfo("env.IsDevelopment():", env.IsDevelopment());
+                logger.LogInfo("WebHostEnvironment.WebRootPath", WebHostEnvironment.WebRootPath);
+                logger.LogInfo("env.IsDevelopment()", env.IsDevelopment());
             }
 
             // Init 
@@ -234,8 +234,9 @@ namespace TeleNeuro.API
             {
                 if (i is not UIException)
                 {
+                    IBasicLogger exceptionLogger = (IBasicLogger)app.ApplicationServices.GetService(typeof(IBasicLogger));
                     string guid = Guid.NewGuid().ToString();
-                    logger?.LogException("--------UNHANDLED EXCEPTION--------", i);
+                    exceptionLogger?.LogException("--------UNHANDLED EXCEPTION--------", i);
                     if (i is SixLabors.ImageSharp.ImageProcessingException || i is SixLabors.ImageSharp.ImageFormatException)
                     {
                         return new Exception($"Döküman yüklerken bir hata meydana geldi (IMAGE).\n\nGUID : {guid}", i);

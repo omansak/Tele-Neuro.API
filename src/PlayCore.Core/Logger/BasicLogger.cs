@@ -28,7 +28,7 @@ namespace PlayCore.Core.Logger
             ReadWriteLock.EnterWriteLock();
             try
             {
-                if ((int)logLevel >= (int)MinLogLevel)
+                if ((int)logLevel <= (int)MinLogLevel)
                 {
                     if (File.Exists(Path))
                     {
