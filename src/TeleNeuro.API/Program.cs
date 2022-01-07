@@ -1,8 +1,8 @@
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.IO;
 
 namespace TeleNeuro.API
 {
@@ -18,15 +18,23 @@ namespace TeleNeuro.API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    var wwwrootPath = new ConfigurationBuilder()
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                        .AddJsonFile($"appsettings.Development.json", optional: true, true)
-                        .Build()["Path:wwwroot"];
-                    if (!string.IsNullOrWhiteSpace(wwwrootPath))
-                        webBuilder.UseWebRoot(wwwrootPath);
+                    var configurationBuilder = new ConfigurationBuilder()
+                        .SetBasePath(Directory.GetCurrentDirectory());
+
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development)
+                    {
+                        configurationBuilder.AddJsonFile($"appsettings.Development.json", optional: true, true);
+                    }
                     else
-                        webBuilder.UseWebRoot("wwwroot");
+                    {
+                        configurationBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                    }
+
+
+                    var configuration = configurationBuilder.Build();
+
+                    webBuilder.UseWebRoot(!string.IsNullOrWhiteSpace(configuration["Path:wwwroot"]) ? configuration["Path:wwwroot"] : "wwwroot");
+
                     webBuilder.UseStartup<Startup>();
                 });
     }
