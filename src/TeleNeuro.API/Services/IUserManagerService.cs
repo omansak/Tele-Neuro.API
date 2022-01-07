@@ -8,6 +8,6 @@ namespace TeleNeuro.API.Services
         int UserId { get; }
         string Token { get; }
         IEnumerable<string> Roles { get; }
-        bool CheckMinumumRole(string role);
+        bool CheckMinimumRole(string role);
     }
 }

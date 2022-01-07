@@ -42,7 +42,7 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Subscriber)]
         public async Task<BaseResponse<IEnumerable<CategoryInfo>>> ListActiveCategories(PageInfo pageInfo)
         {
-            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+            int? userId = _userManagerService.CheckMinimumRole(UserRoleDefinition.Contributor)
                 ? null
                 : _userManagerService.UserId;
 
@@ -56,7 +56,7 @@ namespace TeleNeuro.API.Controllers
         [MinimumRoleAuthorize(UserRoleDefinition.Subscriber)]
         public async Task<BaseResponse<CategoryInfo>> GetCategory(int categoryId)
         {
-            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+            int? userId = _userManagerService.CheckMinimumRole(UserRoleDefinition.Contributor)
                 ? null
                 : _userManagerService.UserId;
 

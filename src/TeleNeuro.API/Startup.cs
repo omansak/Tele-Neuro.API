@@ -23,6 +23,7 @@ using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using SixLabors.ImageSharp;
 using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
@@ -226,7 +227,7 @@ namespace TeleNeuro.API
                 {
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                     ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-TypeAsd, Accept");
-                },
+                }
             });
 
 
@@ -237,17 +238,15 @@ namespace TeleNeuro.API
                     IBasicLogger exceptionLogger = (IBasicLogger)app.ApplicationServices.GetService(typeof(IBasicLogger));
                     string guid = Guid.NewGuid().ToString();
                     exceptionLogger?.LogException("--------UNHANDLED EXCEPTION--------", i);
-                    if (i is SixLabors.ImageSharp.ImageProcessingException || i is SixLabors.ImageSharp.ImageFormatException)
+                    switch (i)
                     {
-                        return new Exception($"Döküman yüklerken bir hata meydana geldi (IMAGE).\n\nGUID : {guid}", i);
-                    }
-                    if (i is VimeoApiException)
-                    {
-                        return new Exception($"Döküman yüklerken bir hata meydana geldi (VIDEO).\n\nGUID : {guid}", i);
-                    }
-                    if (i is DbException)
-                    {
-                        return new Exception($"Veritabaný üzerinde hata meydana geldi.\n\nGUID : {guid}", i);
+                        case ImageProcessingException:
+                        case ImageFormatException:
+                            return new Exception($"Döküman yüklerken bir hata meydana geldi (IMAGE).\n\nGUID : {guid}", i);
+                        case VimeoApiException:
+                            return new Exception($"Döküman yüklerken bir hata meydana geldi (VIDEO).\n\nGUID : {guid}", i);
+                        case DbException:
+                            return new Exception($"Veritabaný üzerinde hata meydana geldi.\n\nGUID : {guid}", i);
                     }
                 }
                 return i;

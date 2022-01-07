@@ -77,7 +77,7 @@ namespace TeleNeuro.API.Services
             }
         }
 
-        public bool CheckMinumumRole(string role)
+        public bool CheckMinimumRole(string role)
         {
             if (Roles.Any())
             {

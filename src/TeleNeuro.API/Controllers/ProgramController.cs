@@ -46,7 +46,7 @@ namespace TeleNeuro.API.Controllers
         [HttpPost("{categoryId}")]
         public async Task<BaseResponse<IEnumerable<ProgramInfo>>> ListProgramsByCategory(int categoryId, PageInfo pageInfo)
         {
-            int? userId = _userManagerService.CheckMinumumRole(UserRoleDefinition.Contributor)
+            int? userId = _userManagerService.CheckMinimumRole(UserRoleDefinition.Contributor)
                 ? null
                 : _userManagerService.UserId;
 
