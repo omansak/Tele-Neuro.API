@@ -52,6 +52,7 @@ namespace PlayCore.Core.Repository
         Task<int> ExecuteProcedureNonQueryAsync(string raw, params object[] parameters);
         Task<TResult> ExecuteScalarAsync<TResult>(IExecutableQuery command);
         Task<int> ExecuteNonQueryAsync(IExecutableQuery command);
+        Task<int> ExecuteSqlRawAsync(string raw, params object[] parameters);
     }
 }
 

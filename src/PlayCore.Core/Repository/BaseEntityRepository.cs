@@ -174,32 +174,37 @@ namespace PlayCore.Core.Repository
         {
             return await ExecuteNonQueryAsync(raw, CommandType.StoredProcedure, parameters);
         }
+
+        public async Task<int> ExecuteSqlRawAsync(string raw, params object[] parameters)
+        {
+            return await _context.Database.ExecuteSqlRawAsync(raw, parameters);
+        }
+
         private async Task<TResult> ExecuteScalarAsync<TResult>(string raw, CommandType commandType, params object[] parameters)
         {
-            using (DbConnection connection = _context.Database.GetDbConnection())
-            {
-                using (DbCommand command = connection.CreateCommand())
-                {
-                    command.CommandType = commandType;
-                    command.CommandText = raw;
-                    command.Parameters.AddRange(parameters);
-                    return (TResult)await command.ExecuteScalarAsync(_cancellationToken);
-                }
-            }
+            DbConnection connection = _context.Database.GetDbConnection();
+            await using DbCommand command = connection.CreateCommand();
+            command.CommandType = commandType;
+            command.CommandText = raw;
+            command.Parameters.AddRange(parameters);
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync(_cancellationToken);
+            object result = await command.ExecuteScalarAsync(_cancellationToken);
+            return result == null ? default : (TResult)result;
         }
+
         private async Task<int> ExecuteNonQueryAsync(string raw, CommandType commandType, params object[] parameters)
         {
-            using (DbConnection connection = _context.Database.GetDbConnection())
-            {
-                using (DbCommand command = connection.CreateCommand())
-                {
-                    command.CommandType = commandType;
-                    command.CommandText = raw;
-                    command.Parameters.AddRange(parameters);
-                    return await command.ExecuteNonQueryAsync(_cancellationToken);
-                }
-            }
+            DbConnection connection = _context.Database.GetDbConnection();
+            await using DbCommand command = connection.CreateCommand();
+            command.CommandType = commandType;
+            command.CommandText = raw;
+            command.Parameters.AddRange(parameters);
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync(_cancellationToken);
+            return await command.ExecuteNonQueryAsync(_cancellationToken);
         }
+
         private IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
         {
             return SpecificationEvaluator<TEntity>.GetQuery(_entities.AsQueryable(), spec);

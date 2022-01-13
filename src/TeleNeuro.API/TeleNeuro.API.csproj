@@ -39,6 +39,7 @@
 		<ProjectReference Include="..\TeleNeuro.Service.CategoryService\TeleNeuro.Service.CategoryService.csproj" />
 		<ProjectReference Include="..\TeleNeuro.Service.DocumentService\TeleNeuro.Service.DocumentService.csproj" />
 		<ProjectReference Include="..\TeleNeuro.Service.ExerciseService\TeleNeuro.Service.ExerciseService.csproj" />
+		<ProjectReference Include="..\TeleNeuro.Service.MessagingService\TeleNeuro.Service.MessagingService.csproj" />
 		<ProjectReference Include="..\TeleNeuro.Service.ProgramService\TeleNeuro.Service.ProgramService.csproj" />
 		<ProjectReference Include="..\TeleNeuro.Service.UserService\TeleNeuro.Service.UserService.csproj" />
 		<ProjectReference Include="..\TeleNeuro.Service.UtilityService\TeleNeuro.Service.UtilityService.csproj" />

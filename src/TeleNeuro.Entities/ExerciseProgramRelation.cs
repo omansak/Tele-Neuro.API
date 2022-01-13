@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TeleNeuro.Entities
@@ -6,6 +7,7 @@ namespace TeleNeuro.Entities
     [Table("EXERCISE_PROGRAM_RELATION")]
     public class ExerciseProgramRelation
     {
+        [Key]
         [Column("ID")]
         public int Id { get; set; }
         [Column("PROGRAM_ID")]

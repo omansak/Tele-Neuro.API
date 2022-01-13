@@ -14,9 +14,11 @@ namespace TeleNeuro.Entity.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.LogTo(i =>
             {
+                Console.BackgroundColor = ConsoleColor.Red;
                 Console.WriteLine("------- DATABASE QUERY ----------");
                 Console.WriteLine(i);
                 Console.WriteLine("------- DATABASE QUERY ----------");
+                Console.ResetColor();
             }, LogLevel.Information);
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -33,6 +35,10 @@ namespace TeleNeuro.Entity.Context
             builder.Entity<ExerciseProgramRelationProperty>();
             builder.Entity<UserProgramRelation>();
             builder.Entity<RelationStatLog>();
+            builder.Entity<Conversation>();
+            builder.Entity<ConversationParticipant>();
+            builder.Entity<Message>();
+            builder.Entity<MessageRead>();
         }
     }
 }

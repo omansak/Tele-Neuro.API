@@ -33,18 +33,21 @@ namespace TeleNeuro.API.Controllers
             return new BaseResponse<ProgramInfo>()
                 .SetResult(await _programService.GetProgram(programId));
         }
+
         [HttpGet("{programId}")]
         public async Task<BaseResponse<IEnumerable<ProgramAssignedExerciseInfo>>> AssignedExercises(int programId)
         {
             return new BaseResponse<IEnumerable<ProgramAssignedExerciseInfo>>()
                 .SetResult(await _programService.AssignedExercises(programId, true));
         }
+
         [HttpGet("{exerciseId}")]
         public async Task<BaseResponse<ExerciseInfo>> GetActiveExercise(int exerciseId)
         {
             return new BaseResponse<ExerciseInfo>()
                 .SetResult(await _exerciseService.GetActiveExercise(exerciseId));
         }
+
         [HttpPost]
         public async Task<BaseResponse<List<AssignedProgramOfUserInfo>>> SelfAssignedPrograms(PageInfo pageInfo)
         {

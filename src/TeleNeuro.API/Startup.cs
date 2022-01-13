@@ -16,6 +16,7 @@ using PlayCore.Core.QueuedHostedService;
 using Service.Document.DocumentServiceSelector;
 using Service.Document.Image.ImageSharp;
 using Service.Document.Video.Vimeo;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
@@ -23,12 +24,13 @@ using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using SixLabors.ImageSharp;
+using Microsoft.Extensions.Logging;
 using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.CategoryService;
 using TeleNeuro.Service.ExerciseService;
+using TeleNeuro.Service.MessagingService;
 using TeleNeuro.Service.ProgramService;
 using TeleNeuro.Service.UserService;
 using TeleNeuro.Service.UtilityService;
@@ -104,6 +106,7 @@ namespace TeleNeuro.API
             services.AddScoped<IProgramService, ProgramService>();
             services.AddScoped<IUtilityService, UtilityService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<Service.DocumentService.IDocumentService, Service.DocumentService.DocumentService>();
             services
                 .AddDocumentImageService(new DocumentImageServiceOptions
@@ -193,6 +196,16 @@ namespace TeleNeuro.API
                     };
                 });
             // MVC
+            if (WebHostEnvironment.IsDevelopment())
+            {
+                services.AddLogging(builder =>
+                {
+                    builder.SetMinimumLevel(LogLevel.Information);
+                    builder.AddFilter("Microsoft", LogLevel.Warning);
+                    builder.AddFilter("System", LogLevel.Error);
+                    builder.AddFilter("Engine", LogLevel.Warning);
+                });
+            }
             services.AddControllers();
             services.AddMvcCore().AddNewtonsoftJson();
         }

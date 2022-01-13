@@ -168,6 +168,10 @@ namespace PlayCore.Core.Repository
         {
             return await ExecuteNonQueryAsync(raw, CommandType.StoredProcedure, parameters);
         }
+        public async Task<int> ExecuteSqlRawAsync(string raw, params object[] parameters)
+        {
+            return await _context.Database.ExecuteSqlRawAsync(raw, parameters);
+        }
         private async Task<TResult> ExecuteScalarAsync<TResult>(string raw, CommandType commandType, params object[] parameters)
         {
             DbConnection connection = _context.Database.GetDbConnection();
