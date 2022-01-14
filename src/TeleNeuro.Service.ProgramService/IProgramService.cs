@@ -66,14 +66,14 @@ namespace TeleNeuro.Service.ProgramService
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<int> AssignUser(AssignUserModel model);
+        Task<int> AssignUser(AssignProgramUserModel model);
 
         /// <summary>
         /// Delete a relation of user of program relation
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<bool> DeleteAssignedUser(AssignUserModel model);
+        Task<bool> DeleteAssignedUser(AssignProgramUserModel model);
 
         /// <summary>
         /// List assigned users of program

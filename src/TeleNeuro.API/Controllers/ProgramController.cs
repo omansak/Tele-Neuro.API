@@ -86,18 +86,19 @@ namespace TeleNeuro.API.Controllers
         }
 
         [HttpPost]
-        public async Task<BaseResponse<int>> AssignUser(AssignUserModel model)
+        public async Task<BaseResponse<int>> AssignUser(AssignProgramUserModel model)
         {
             model.AssignedUserId = _userManagerService.UserId;
             return new BaseResponse<int>().SetResult(await _programService.AssignUser(model));
         }
 
         [HttpPost]
-        public async Task<BaseResponse<bool>> DeleteAssignedUser(AssignUserModel model)
+        public async Task<BaseResponse<bool>> DeleteAssignedUser(AssignProgramUserModel model)
         {
             model.AssignedUserId = _userManagerService.UserId;
             return new BaseResponse<bool>().SetResult(await _programService.DeleteAssignedUser(model));
         }
+
         [HttpPost]
         public async Task<BaseResponse<IEnumerable<ProgramAssignedExerciseInfo>>> AssignedExercises([FromBody] int programId)
         {

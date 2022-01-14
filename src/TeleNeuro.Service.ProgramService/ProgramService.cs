@@ -214,7 +214,7 @@ namespace TeleNeuro.Service.ProgramService
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<int> AssignUser(AssignUserModel model)
+        public async Task<int> AssignUser(AssignProgramUserModel model)
         {
             var user = await _baseRepository.SingleOrDefaultAsync<User>(i => i.IsActive && i.Id == model.UserId);
             if (user == null)
@@ -247,7 +247,7 @@ namespace TeleNeuro.Service.ProgramService
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteAssignedUser(AssignUserModel model)
+        public async Task<bool> DeleteAssignedUser(AssignProgramUserModel model)
         {
             var user = await _baseRepository.SingleOrDefaultAsync<User>(i => i.IsActive && i.Id == model.UserId);
             if (user == null)
@@ -290,6 +290,7 @@ namespace TeleNeuro.Service.ProgramService
                     .Where(i => i.Relation.ProgramId == programRow.Id);
 
                 var resultQuery = query
+                    .OrderByDescending(i => i.Relation.CreatedDate)
                     .Skip((model.PageInfo.Page - 1) * model.PageInfo.PageSize)
                     .Take(model.PageInfo.PageSize)
                     .Select(i => new AssignedProgramUserInfo

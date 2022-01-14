@@ -25,9 +25,11 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Service.Document.File.PhysicalDrive;
 using TeleNeuro.API.Services;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
+using TeleNeuro.Service.BrochureService;
 using TeleNeuro.Service.CategoryService;
 using TeleNeuro.Service.ExerciseService;
 using TeleNeuro.Service.MessagingService;
@@ -103,6 +105,7 @@ namespace TeleNeuro.API
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IUserManagerService, UserManagerService>();
             services.AddScoped<IExerciseService, ExerciseService>();
+            services.AddScoped<IBrochureService, BrochureService>();
             services.AddScoped<IProgramService, ProgramService>();
             services.AddScoped<IUtilityService, UtilityService>();
             services.AddScoped<IUserService, UserService>();
@@ -138,7 +141,35 @@ namespace TeleNeuro.API
                         }).GetAwaiter().GetResult();
                     };
                 });
-
+            services
+                .AddDocumentFileService(new DocumentFileServiceOptions
+                {
+                    BaseFolder = WebHostEnvironment.WebRootPath,
+                    Directory = Configuration["Path:FileUploadDirectory"],
+                })
+                .Configure<Service.DocumentService.IDocumentService>((i, j) =>
+                {
+                    i.CompletedAction = (result) =>
+                    {
+                        j.InsertDocument(new Document
+                        {
+                            Guid = result.Guid,
+                            Name = result.Name,
+                            FileName = result.FileName,
+                            Extension = result.Extension,
+                            ContentType = result.ContentType,
+                            Directory = result.DocumentPath.Directory,
+                            Path = result.DocumentPath.Path,
+                            PhysicalBase = result.DocumentPath.Base,
+                            PhysicalFullPath = result.DocumentPath.FullPath,
+                            HostBase = Configuration["Path:Host"],
+                            HostFullPath = Path.Join(Configuration["Path:Host"], result.DocumentPath.Path),
+                            Type = (int)result.Type,
+                            CreatedDate = result.CreatedDate,
+                            IsActive = true
+                        }).GetAwaiter().GetResult();
+                    };
+                });
             services
                 .AddDocumentVideoService(new DocumentVideoServiceOptions
                 {

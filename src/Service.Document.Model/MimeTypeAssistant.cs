@@ -218,5 +218,32 @@ namespace Service.Document.Model
             }
             return "unknown";
         }
+
+        public static DocumentType GetDocumentType(string mimeType)
+        {
+            var type = mimeType?.Split("/")?[0]?.ToLower();
+            DocumentType documentType = type switch
+            {
+                "image" => DocumentType.Image,
+                "video" => DocumentType.Video,
+                "text" => mimeType?.Split("/")?[1]?.ToLower() switch
+                {
+                    "html" => DocumentType.Html,
+                    "plain" => DocumentType.Text,
+                    _ => DocumentType.Object
+                },
+                "application" => mimeType?.Split("/")?[1]?.ToLower() switch
+                {
+                    "msword" => DocumentType.Word,
+                    "pdf" => DocumentType.Pdf,
+                    "vnd.ms-excel" => DocumentType.Excel,
+                    "vnd.openxmlformats-officedocument.spreadsheetml.sheet" => DocumentType.Excel,
+                    _ => DocumentType.Object
+                },
+                _ => DocumentType.Object
+            };
+
+            return documentType;
+        }
     }
 }

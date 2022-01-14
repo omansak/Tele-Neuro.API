@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Service.Document.File.PhysicalDrive\Service.Document.File.PhysicalDrive.csproj" />
     <ProjectReference Include="..\Service.Document.Image.ImageSharp\Service.Document.Image.ImageSharp.csproj" />
     <ProjectReference Include="..\Service.Document.Model\Service.Document.Model.csproj" />
     <ProjectReference Include="..\Service.Document.Video.Vimeo\Service.Document.Video.Vimeo.csproj" />

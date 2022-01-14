@@ -4,6 +4,8 @@ using PlayCore.Core.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TeleNeuro.API.Services;
+using TeleNeuro.Service.BrochureService;
+using TeleNeuro.Service.BrochureService.Models;
 using TeleNeuro.Service.ExerciseService;
 using TeleNeuro.Service.ExerciseService.Models;
 using TeleNeuro.Service.ProgramService;
@@ -17,14 +19,16 @@ namespace TeleNeuro.API.Controllers
     public class ContentController
     {
         private readonly IProgramService _programService;
+        private readonly IBrochureService _brochureService;
         private readonly IExerciseService _exerciseService;
         private readonly IUserManagerService _userManagerService;
 
-        public ContentController(IProgramService programService, IExerciseService exerciseService, IUserManagerService userManagerService)
+        public ContentController(IProgramService programService, IExerciseService exerciseService, IUserManagerService userManagerService, IBrochureService brochureService)
         {
             _programService = programService;
             _exerciseService = exerciseService;
             _userManagerService = userManagerService;
+            _brochureService = brochureService;
         }
 
         [HttpGet("{programId}")]
@@ -57,6 +61,21 @@ namespace TeleNeuro.API.Controllers
                 UserId = _userManagerService.UserId
             });
             return new BaseResponse<List<AssignedProgramOfUserInfo>>()
+                .SetResult(result)
+                .SetTotalCount(count)
+                .SetPage(pageInfo.Page)
+                .SetPageSize(pageInfo.PageSize);
+        }
+
+        [HttpPost]
+        public async Task<BaseResponse<List<AssignedBrochureOfUserInfo>>> SelfAssignedBrochures(PageInfo pageInfo)
+        {
+            var (result, count) = await _brochureService.ListAssignedBrochures(new AssignedBrochureOfUserModel
+            {
+                PageInfo = pageInfo,
+                UserId = _userManagerService.UserId
+            });
+            return new BaseResponse<List<AssignedBrochureOfUserInfo>>()
                 .SetResult(result)
                 .SetTotalCount(count)
                 .SetPage(pageInfo.Page)

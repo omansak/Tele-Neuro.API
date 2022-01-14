@@ -37,7 +37,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.UserServi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayCore.Core", "PlayCore.Core\PlayCore.Core.csproj", "{5E7C250C-942C-4DE3-B14D-6EF5A7D13E1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleNeuro.Service.MessagingService", "TeleNeuro.Service.MessagingService\TeleNeuro.Service.MessagingService.csproj", "{33A78A5C-0E5F-4873-9BD4-57C924E0DFEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeleNeuro.Service.MessagingService", "TeleNeuro.Service.MessagingService\TeleNeuro.Service.MessagingService.csproj", "{33A78A5C-0E5F-4873-9BD4-57C924E0DFEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Document.File.PhysicalDrive", "Service.Document.File.PhysicalDrive\Service.Document.File.PhysicalDrive.csproj", "{1FD159E6-31F1-4786-85D9-79B20B5D4087}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleNeuro.Service.BrochureService", "TeleNeuro.Service.BrochureService\TeleNeuro.Service.BrochureService.csproj", "{20CD21D7-AD63-430E-9926-A48985A42F8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,6 +109,14 @@ Global
 		{33A78A5C-0E5F-4873-9BD4-57C924E0DFEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33A78A5C-0E5F-4873-9BD4-57C924E0DFEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33A78A5C-0E5F-4873-9BD4-57C924E0DFEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FD159E6-31F1-4786-85D9-79B20B5D4087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FD159E6-31F1-4786-85D9-79B20B5D4087}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FD159E6-31F1-4786-85D9-79B20B5D4087}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FD159E6-31F1-4786-85D9-79B20B5D4087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20CD21D7-AD63-430E-9926-A48985A42F8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20CD21D7-AD63-430E-9926-A48985A42F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20CD21D7-AD63-430E-9926-A48985A42F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20CD21D7-AD63-430E-9926-A48985A42F8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +135,8 @@ Global
 		{3289496C-F458-45E2-A214-88E575D54DF2} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
 		{7ADAE295-DF2B-4339-9481-B406D0D2C176} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
 		{33A78A5C-0E5F-4873-9BD4-57C924E0DFEF} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
+		{1FD159E6-31F1-4786-85D9-79B20B5D4087} = {ABC9BBE2-4AC5-4D14-9966-54721BFE122F}
+		{20CD21D7-AD63-430E-9926-A48985A42F8C} = {28A1E883-E143-4E76-9B84-42DDFE5C516D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C2AECEFC-FBB5-40E3-9F17-F2FF1607D762}

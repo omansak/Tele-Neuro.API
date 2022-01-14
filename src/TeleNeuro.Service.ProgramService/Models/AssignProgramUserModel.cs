@@ -1,6 +1,6 @@
 ﻿namespace TeleNeuro.Service.ProgramService.Models
 {
-    public class AssignUserModel
+    public class AssignProgramUserModel
     {
         public int ProgramId { get; set; }
         public int UserId { get; set; }

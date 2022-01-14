@@ -39,6 +39,8 @@ namespace TeleNeuro.Entity.Context
             builder.Entity<ConversationParticipant>();
             builder.Entity<Message>();
             builder.Entity<MessageRead>();
+            builder.Entity<Brochure>();
+            builder.Entity<UserBrochureRelation>();
         }
     }
 }

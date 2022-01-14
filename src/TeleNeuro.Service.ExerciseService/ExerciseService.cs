@@ -126,7 +126,7 @@ namespace TeleNeuro.Service.ExerciseService
                 return true;
             }
 
-            throw new UIException("Kategori bulunamadi");
+            throw new UIException("Egzersiz bulunamadi");
         }
 
         /// <summary>

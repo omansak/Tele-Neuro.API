@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Service.Document.File.PhysicalDrive;
 using Service.Document.Image.ImageSharp;
 using Service.Document.Model;
 using Service.Document.Video.Vimeo;
@@ -16,6 +17,13 @@ namespace Service.Document.DocumentServiceSelector
         {
             { DocumentType.Image, typeof(IDocumentImageService) },
             { DocumentType.Video, typeof(IDocumentVideoService) },
+            { DocumentType.Audio, typeof(IDocumentFileService) },
+            { DocumentType.Excel, typeof(IDocumentFileService) },
+            { DocumentType.Html, typeof(IDocumentFileService) },
+            { DocumentType.Pdf, typeof(IDocumentFileService) },
+            { DocumentType.Text, typeof(IDocumentFileService) },
+            { DocumentType.Word, typeof(IDocumentFileService) },
+            { DocumentType.Object, typeof(IDocumentFileService) },
         };
 
         public DocumentServiceSelector(IServiceProvider serviceProvider)
@@ -25,13 +33,7 @@ namespace Service.Document.DocumentServiceSelector
 
         public IDocumentService GetService(IFormFile file, IEnumerable<DocumentType> availableDocumentTypes = null)
         {
-            var type = file.ContentType?.Split("/")?[0]?.ToLower();
-            DocumentType documentType = type switch
-            {
-                "image" => DocumentType.Image,
-                "video" => DocumentType.Video,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            DocumentType documentType = MimeTypeAssistant.GetDocumentType(file?.ContentType);
             if (availableDocumentTypes != null && availableDocumentTypes.All(i => i != documentType))
             {
                 throw new FormatException("File format is not available");
