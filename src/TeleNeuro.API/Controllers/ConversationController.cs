@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PlayCore.Core.CustomException;
 using PlayCore.Core.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TeleNeuro.API.Hubs;
 using TeleNeuro.API.Services;
 using TeleNeuro.Service.MessagingService;
 using TeleNeuro.Service.MessagingService.Models;
@@ -16,18 +18,20 @@ namespace TeleNeuro.API.Controllers
     {
         private readonly IUserManagerService _userManagerService;
         private readonly IConversationService _conversationService;
+        private readonly INotificationHubService _notificationHubService;
 
-        public ConversationController(IUserManagerService userManagerService, IConversationService conversationService)
+        public ConversationController(IUserManagerService userManagerService, IConversationService conversationService, INotificationHubService notificationHubService)
         {
             _userManagerService = userManagerService;
             _conversationService = conversationService;
+            _notificationHubService = notificationHubService;
         }
 
         [HttpPost]
-        public async Task<BaseResponse<int>> CreateConversation(CreateConversationModel model)
+        public async Task<BaseResponse<ConversationSummary>> CreateConversation(CreateConversationModel model)
         {
             model.UserId = _userManagerService.UserId;
-            return new BaseResponse<int>().SetResult(await _conversationService.CreateConversation(model));
+            return new BaseResponse<ConversationSummary>().SetResult(await _conversationService.CreateConversation(model));
         }
 
         [HttpGet]
@@ -37,10 +41,17 @@ namespace TeleNeuro.API.Controllers
         }
 
         [HttpPost]
-        public async Task<BaseResponse<bool>> InsertMessage(InsertMessageModel model)
+        public async Task<BaseResponse<ConversationMessage>> InsertMessage(InsertMessageModel model)
         {
             model.UserId = _userManagerService.UserId;
-            return new BaseResponse<bool>().SetResult(await _conversationService.InsertMessage(model));
+            var result = await _conversationService.InsertMessage(model);
+            if (result is { MessageId: > 0 })
+            {
+                await _notificationHubService.NotifyNewMessage(result);
+                return new BaseResponse<ConversationMessage>().SetResult(result);
+            }
+
+            throw new UIException("Mesaj gönderilirken bir hata oluştur");
         }
 
         [HttpPost]
@@ -48,6 +59,23 @@ namespace TeleNeuro.API.Controllers
         {
             model.UserId = _userManagerService.UserId;
             return new BaseResponse<ConversationMessageInfo>().SetResult(await _conversationService.ConversationMessages(model, 10));
+        }
+
+        [HttpPost("{conversationId}")]
+        public async Task<BaseResponse<bool>> ReadConversationAllMessages(int conversationId)
+        {
+            var result = await _conversationService.ReadConversationAllMessages(conversationId, _userManagerService.UserId);
+            if (result)
+            {
+                await _notificationHubService.NotifyReadConversation(_userManagerService.UserId, conversationId);
+            }
+            return new BaseResponse<bool>().SetResult(result);
+        }
+
+        [HttpGet]
+        public async Task<BaseResponse<int>> UserUnreadConversationCount()
+        {
+            return new BaseResponse<int>().SetResult(await _conversationService.UserUnreadConversationCount(_userManagerService.UserId));
         }
     }
 }

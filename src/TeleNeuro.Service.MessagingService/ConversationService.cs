@@ -21,7 +21,7 @@ namespace TeleNeuro.Service.MessagingService
             _baseRepository = baseRepository;
         }
 
-        public async Task<int> CreateConversation(CreateConversationModel model)
+        public async Task<ConversationSummary> CreateConversation(CreateConversationModel model)
         {
             var user = await _baseRepository.SingleOrDefaultAsync<User>(i => i.Id == model.UserId);
 
@@ -34,7 +34,7 @@ namespace TeleNeuro.Service.MessagingService
             if (participants == null || participants.Length == 0)
                 throw new UIException("En az bir alıcı gereklidir.");
 
-            var participantUsers = await _baseRepository.ListAsync<User>(i => model.Participants.Contains(i.Id));
+            var participantUsers = await _baseRepository.ListAsync<User>(i => participants.Contains(i.Id));
 
             if (participantUsers.Count > 1 && string.IsNullOrWhiteSpace(model.GroupName))
                 throw new UIException("Grup konuşmalarında grup ismi zorunludur.");
@@ -67,7 +67,7 @@ namespace TeleNeuro.Service.MessagingService
                     .SingleOrDefault(i => i.Participants.Count == 2 && string.Join(",", i.Participants.OrderBy(j => j)) == string.Join(",", participantUsers.Select(j => j.Id).Concat(new[] { model.UserId }).OrderBy(j => j)));
 
                 if (oldConversation != null)
-                    return oldConversation.ConversationId;
+                    return (await UserConversations(user.Id, oldConversation.ConversationId, true)).SingleOrDefault();
             }
 
             var conversation = await _baseRepository.InsertAsync(new Conversation
@@ -83,24 +83,32 @@ namespace TeleNeuro.Service.MessagingService
             {
                 foreach (var item in participantUsers.Select(j => j.Id).Concat(new[] { model.UserId }))
                 {
-                    await _baseRepository.InsertAsync(new ConversationParticipant()
+                    await _baseRepository.InsertAsync(new ConversationParticipant
                     {
                         ConversationId = conversation.Id,
                         UserId = item
                     });
                 }
 
-                return conversation.Id;
+                return (await UserConversations(user.Id, conversation.Id, true)).SingleOrDefault();
             }
 
             throw new UIException("Konuşma oluşturulamadı");
 
         }
 
-        public async Task<List<ConversationSummary>> UserConversations(int userId)
+        public async Task<List<ConversationSummary>> UserConversations(int userId, int? conversationId = null, bool includeEmpty = false)
         {
+            var conversationsIds = await _baseRepository
+                .GetQueryable<ConversationParticipant>()
+                .Where(i => i.UserId == userId)
+                .Select(i => i.ConversationId)
+                .Distinct()
+                .ToListAsync();
+
             return (await _baseRepository
                 .GetQueryable<Conversation>()
+                .Where(i => !conversationId.HasValue || i.Id == conversationId)
                 .Join(_baseRepository.GetQueryable<ConversationParticipant>(), i => i.Id, j => j.ConversationId, (i, j) => new
                 {
                     Conversation = i,
@@ -119,7 +127,7 @@ namespace TeleNeuro.Service.MessagingService
                     User = i.User,
                     UserProfile = j
                 })
-                .Where(i => i.Conversation.UserId == userId && i.Conversation.IsActive)
+                .Where(i => conversationsIds.Contains(i.Conversation.Id) && i.Conversation.IsActive)
                 .Select(i => new
                 {
                     Conversation = i.Conversation,
@@ -132,9 +140,9 @@ namespace TeleNeuro.Service.MessagingService
                         UserProfile = i.UserProfile
                     },
                     LastMessage = _baseRepository.GetQueryable<Message>().Where(j => j.ConversationId == i.Conversation.Id).OrderByDescending(j => j.CreateDate).FirstOrDefault(),
-                    HasUnread = _baseRepository.GetQueryable<MessageRead>().Any(j => j.ConversationId == i.Conversation.Id && j.IsRead == false)
+                    HasUnread = _baseRepository.GetQueryable<MessageRead>().Any(j => j.ConversationId == i.Conversation.Id && j.IsRead == false && j.UserId == userId)
                 })
-                .Where(i => i.LastMessage != null)
+                .Where(i => includeEmpty || i.Conversation.IsGroup || i.LastMessage != null)
                 .ToListAsync())
                 .GroupBy(i => i.Conversation.Id)
                 .Select(i => new ConversationSummary
@@ -143,16 +151,18 @@ namespace TeleNeuro.Service.MessagingService
                     IsGroup = i.FirstOrDefault(j => j.Conversation.Id == i.Key)?.Conversation.IsGroup ?? false,
                     Name = i.FirstOrDefault(j => j.Conversation.Id == i.Key)?.Conversation.Name,
                     LastMessage = i.FirstOrDefault(j => j.Conversation.Id == i.Key)?.LastMessage?.MessageString,
+                    LastMessageDate = i.FirstOrDefault(j => j.Conversation.Id == i.Key)?.LastMessage?.CreateDate,
                     HasUnread = i.FirstOrDefault(j => j.Conversation.Id == i.Key)?.HasUnread ?? false,
                     Participants = i.Where(j => j.Conversation.Id == i.Key).Select(j => j.ParticipantUserInfo),
                 })
+                .OrderByDescending(i => i.LastMessageDate)
                 .ToList();
         }
 
-        public async Task<bool> InsertMessage(InsertMessageModel model)
+        public async Task<ConversationMessage> InsertMessage(InsertMessageModel model)
         {
             var conversation = await _baseRepository.SingleOrDefaultAsync<Conversation>(i => i.Id == model.ConversationId && i.IsActive);
-
+            var dateNow = DateTime.Now;
             if (conversation == null)
                 throw new UIException("Konuşma bulunamadı");
 
@@ -166,7 +176,7 @@ namespace TeleNeuro.Service.MessagingService
                 ConversationId = model.ConversationId,
                 UserId = model.UserId,
                 MessageString = model.Message,
-                CreateDate = DateTime.Now
+                CreateDate = dateNow
             });
 
             foreach (var item in conversationParticipants)
@@ -177,11 +187,28 @@ namespace TeleNeuro.Service.MessagingService
                     ConversationId = model.ConversationId,
                     UserId = item.UserId,
                     IsRead = item.UserId == model.UserId,
-                    CreateDate = DateTime.Now,
-                    UpdateDate = DateTime.Now
+                    CreateDate = dateNow,
+                    UpdateDate = dateNow
                 });
             }
-            return true;
+
+            return new ConversationMessage
+            {
+                ConversationId = conversation.Id,
+                CreateDate = message.CreateDate,
+                Message = message.MessageString,
+                MessageId = message.Id,
+                UserId = message.UserId,
+                MessageReads = conversationParticipants.Select(i => new MessageRead
+                {
+                    UserId = i.UserId,
+                    ConversationId = i.ConversationId,
+                    MessageId = message.Id,
+                    CreateDate = dateNow,
+                    IsRead = i.UserId == model.UserId,
+                    UpdateDate = dateNow
+                })
+            };
         }
 
         public async Task<ConversationMessageInfo> ConversationMessages(ConversationMessageModel model, int pageSize = 10)
@@ -213,6 +240,8 @@ namespace TeleNeuro.Service.MessagingService
                 .OrderByDescending(i => i.CreateDate)
                 .Select(i => new ConversationMessage
                 {
+                    ConversationId = i.ConversationId,
+                    UserId = i.UserId,
                     MessageId = i.Id,
                     Message = i.MessageString,
                     MessageReads = _baseRepository.GetQueryable<MessageRead>().Where(j => j.ConversationId == i.ConversationId && j.MessageId == i.Id).ToList(),
@@ -220,12 +249,6 @@ namespace TeleNeuro.Service.MessagingService
                 })
                 .Take(pageSize)
                 .ToListAsync();
-
-
-            if (messages.Any(message => message.MessageReads.Any(i => !i.IsRead)))
-            {
-                await ReadMessage(conversation.Id, model.UserId);
-            }
 
             DateTime? nextCursor = null;
             if (messages.Count >= pageSize)
@@ -235,14 +258,33 @@ namespace TeleNeuro.Service.MessagingService
 
             return new ConversationMessageInfo
             {
-                ConversationMessage = messages,
+                ConversationMessage = messages.OrderBy(i => i.CreateDate).ToList(),
                 Cursor = nextCursor
             };
         }
 
-        public async Task<bool> ReadMessage(int conversationId, int userId)
+        public async Task<bool> ReadConversationAllMessages(int conversationId, int userId)
         {
-            return (await _baseRepository.ExecuteSqlRawAsync("UPDATE MESSAGE_READ SET IS_READ = 1 WHERE CONVERSATION_ID = {0} AND USER_ID = {1}", conversationId, userId) > 0);
+            return (await _baseRepository.ExecuteSqlRawAsync("UPDATE MESSAGE_READ SET IS_READ = 1, UPDATE_DATE = {0} WHERE CONVERSATION_ID = {1} AND USER_ID = {2} AND IS_READ = 0", DateTime.Now, conversationId, userId) > 0);
+        }
+
+        public Task<List<ConversationParticipant>> ConversationParticipants(int conversationId)
+        {
+            return _baseRepository.ListAsync<ConversationParticipant>(i => i.ConversationId == conversationId);
+        }
+
+        public Task<int> UserUnreadConversationCount(int userId)
+        {
+            return _baseRepository
+                .GetQueryable<ConversationParticipant>()
+                .Where(i => i.UserId == userId)
+                .Select(i => i.ConversationId)
+                .Distinct()
+                .Select(i => new
+                {
+                    HasUnread = _baseRepository.GetQueryable<MessageRead>().Any(j => j.ConversationId == i && j.IsRead == false && j.UserId == userId)
+                })
+                .CountAsync(i => i.HasUnread);
         }
     }
 }

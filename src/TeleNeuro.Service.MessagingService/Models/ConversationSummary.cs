@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TeleNeuro.Service.MessagingService.Models
 {
@@ -8,6 +9,7 @@ namespace TeleNeuro.Service.MessagingService.Models
         public bool IsGroup { get; set; }
         public string Name { get; set; }
         public string LastMessage { get; set; }
+        public DateTime? LastMessageDate { get; set; }
         public bool HasUnread { get; set; }
         public IEnumerable<ParticipantUserInfo> Participants { get; set; }
     }

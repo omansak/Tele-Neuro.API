@@ -6,6 +6,8 @@ namespace TeleNeuro.Service.MessagingService.Models
 {
     public class ConversationMessage
     {
+        public int ConversationId { get; set; }
+        public int UserId { get; set; }
         public int MessageId { get; set; }
         public string Message { get; set; }
         public DateTime CreateDate { get; set; }
