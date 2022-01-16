@@ -67,6 +67,7 @@ namespace TeleNeuro.API.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 CreatedUser = _userManagerService.UserId,
+                Keywords = model.Keywords,
                 IsActive = model.IsActive
             });
 

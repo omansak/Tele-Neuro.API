@@ -101,8 +101,8 @@ namespace TeleNeuro.API
                 Issuer = Configuration["JWTTokenConfig:Issuer"],
                 Audience = Configuration["JWTTokenConfig:Audience"],
                 Secret = Configuration["JWTTokenConfig:Secret"],
-                AccessTokenExpirationMinute = 60,
-                RefreshTokenExpirationMinute = 60 * 24 * 7
+                AccessTokenExpirationMinute = 60 * 24 * 7,
+                RefreshTokenExpirationMinute = 60 * 24 * 30
             });
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IUserManagerService, UserManagerService>();

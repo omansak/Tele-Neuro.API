@@ -14,6 +14,8 @@ namespace TeleNeuro.Entities
         public string Name { get; set; }
         [Column("DESCRIPTION")]
         public string Description { get; set; }
+        [Column("KEYWORDS")]
+        public string Keywords { get; set; }
         [Column("IS_ACTIVE")]
         public bool IsActive { get; set; } = true;
         [Column("CREATED_DATE")]

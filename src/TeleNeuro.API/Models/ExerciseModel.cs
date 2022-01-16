@@ -7,6 +7,7 @@ namespace TeleNeuro.API.Models
         public int Id { get; init; }
         public string Name { get; init; }
         public string Description { get; init; }
+        public string Keywords { get; init; }
         public bool IsActive { get; init; }
         public IFormFile File { get; init; }
     }

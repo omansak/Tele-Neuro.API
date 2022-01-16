@@ -30,7 +30,7 @@ namespace TeleNeuro.Service.ExerciseService
         /// <returns></returns>
         public async Task<List<ExerciseInfo>> SearchExercises(string term)
         {
-            return await GetQueryableExercise(i => i.Name.Contains(term) || i.Description.Contains(term))
+            return await GetQueryableExercise(i => i.Name.Contains(term) || i.Description.Contains(term) || i.Keywords.Contains(term))
                 .ToListAsync();
         }
         /// <summary>
@@ -88,6 +88,7 @@ namespace TeleNeuro.Service.ExerciseService
                     exerciseRow.IsActive = exercise.IsActive;
                     exerciseRow.CreatedDate = System.DateTime.Now;
                     exerciseRow.CreatedUser = exercise.CreatedUser;
+                    exerciseRow.Keywords = exercise.Keywords;
                     if (!string.IsNullOrWhiteSpace(exercise.DocumentGuid))
                         exerciseRow.DocumentGuid = exercise.DocumentGuid;
 
@@ -106,7 +107,8 @@ namespace TeleNeuro.Service.ExerciseService
                     IsActive = true,
                     CreatedDate = System.DateTime.Now,
                     DocumentGuid = exercise.DocumentGuid,
-                    CreatedUser = exercise.CreatedUser
+                    CreatedUser = exercise.CreatedUser,
+                    Keywords = exercise.Keywords
                 });
                 return await GetExercise(result.Id);
             }
