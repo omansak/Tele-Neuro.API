@@ -7,6 +7,6 @@ namespace TeleNeuro.Service.UserService.Models
     {
         public User User { get; set; }
         public UserProfile UserProfile { get; set; }
-        public IEnumerable<string> Roles { get; set; }
+        public List<Role> Roles { get; set; }
     }
 }

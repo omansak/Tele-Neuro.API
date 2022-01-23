@@ -1,4 +1,7 @@
-﻿using PlayCore.Core.CustomException;
+﻿using Microsoft.EntityFrameworkCore;
+using PlayCore.Core.CustomException;
+using PlayCore.Core.Extension;
+using PlayCore.Core.Model;
 using PlayCore.Core.PasswordHasher;
 using PlayCore.Core.Repository;
 using PlayCore.Core.ValidateHelper;
@@ -6,11 +9,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using PlayCore.Core.Extension;
-using PlayCore.Core.Model;
 using TeleNeuro.Entities;
 using TeleNeuro.Entity.Context;
 using TeleNeuro.Service.UserService.Models;
@@ -194,7 +193,7 @@ namespace TeleNeuro.Service.UserService
                         {
                             Role = j
                         })
-                        .Select(k => k.Role.Key)
+                        .Select(j => j.Role)
                         .ToList()
                 })
                 .ToQueryableFromBaseFilter(model, includeFilter, includePaging);
