@@ -37,6 +37,7 @@ namespace TeleNeuro.API.Controllers
                 .Where(i => _userManagerService.Roles.Contains(i.Key))
                 .Any(i => Startup.RoleDefinitions.Where(j => model.RoleKey.Contains(j.Key)).Any(j => j.Priority > i.Priority)))
             {
+                model.CreateUserId = _userManagerService.UserId;
                 return new BaseResponse<int>().SetResult(await _userService.UpdateUser(model));
             }
             throw new UIException("Yetkisiz Erişim").SetResultCode(403);
