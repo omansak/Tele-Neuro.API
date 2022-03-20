@@ -12,14 +12,15 @@ namespace PlayCore.Core.Managers.JWTAuthenticationManager
 {
     /// <summary>
     /// JWT Auth. Manager (You can use singleton)
+    /// Don't forget clear Refresh token cache with 'JwtManagerRefreshCache' by 'HostedService', If you are using UseRefreshToken = 'true'
     /// </summary>
-    public class JWTAuthenticationManager : IJWTAuthenticationManager
+    public class JwtAuthenticationManager : IJwtAuthenticationManager
     {
         private readonly ConcurrentDictionary<string, RefreshToken> _refreshTokens;
-        private readonly JWTTokenConfig _jwtTokenConfig;
+        private readonly JwtTokenConfig _jwtTokenConfig;
         private readonly byte[] _secret;
 
-        public JWTAuthenticationManager(JWTTokenConfig jwtTokenConfig)
+        public JwtAuthenticationManager(JwtTokenConfig jwtTokenConfig)
         {
             _jwtTokenConfig = jwtTokenConfig;
             _refreshTokens = new ConcurrentDictionary<string, RefreshToken>();
@@ -28,23 +29,29 @@ namespace PlayCore.Core.Managers.JWTAuthenticationManager
 
         public void RemoveExpiredRefreshTokens(DateTime dateTime)
         {
-            var expiredTokens = _refreshTokens.Where(x => x.Value.ExpireAt < dateTime).ToList();
-            foreach (var expiredToken in expiredTokens)
+            if (_jwtTokenConfig.UseRefreshToken)
             {
-                _refreshTokens.TryRemove(expiredToken.Key, out _);
+                var expiredTokens = _refreshTokens.Where(x => x.Value.ExpireAt < dateTime).ToList();
+                foreach (var expiredToken in expiredTokens)
+                {
+                    _refreshTokens.TryRemove(expiredToken.Key, out _);
+                }
             }
         }
 
         public void RemoveRefreshToken(string guid)
         {
-            var refreshTokens = _refreshTokens.Where(x => x.Value.Guid == guid).ToList();
-            foreach (var refreshToken in refreshTokens)
+            if (_jwtTokenConfig.UseRefreshToken)
             {
-                _refreshTokens.TryRemove(refreshToken.Key, out _);
+                var refreshTokens = _refreshTokens.Where(x => x.Value.Guid == guid).ToList();
+                foreach (var refreshToken in refreshTokens)
+                {
+                    _refreshTokens.TryRemove(refreshToken.Key, out _);
+                }
             }
         }
 
-        public JWTTokenResult Generate(string guid, IEnumerable<Claim> claims)
+        public JwtTokenResult Generate(string guid, IEnumerable<Claim> claims)
         {
             var jwtToken = new JwtSecurityToken(
                 _jwtTokenConfig.Issuer,
@@ -54,22 +61,30 @@ namespace PlayCore.Core.Managers.JWTAuthenticationManager
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(_secret), SecurityAlgorithms.HmacSha256Signature));
             var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
 
-            var refreshToken = new RefreshToken
+            if (_jwtTokenConfig.UseRefreshToken)
             {
-                Guid = guid,
-                TokenString = GenerateRefreshTokenString(),
-                ExpireAt = DateTime.Now.AddMinutes(_jwtTokenConfig.RefreshTokenExpirationMinute)
-            };
-            _refreshTokens.AddOrUpdate(refreshToken.TokenString, refreshToken, (_, _) => refreshToken);
+                var refreshToken = new RefreshToken
+                {
+                    Guid = guid,
+                    TokenString = GenerateRefreshTokenString(),
+                    ExpireAt = DateTime.Now.AddMinutes(_jwtTokenConfig.RefreshTokenExpirationMinute)
+                };
+                _refreshTokens.AddOrUpdate(refreshToken.TokenString, refreshToken, (i, j) => refreshToken);
 
-            return new JWTTokenResult
+                return new JwtTokenResult
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                };
+            }
+
+            return new JwtTokenResult
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
+                AccessToken = accessToken
             };
         }
 
-        public JWTTokenResult Refresh(string refreshToken, string accessToken, string guid)
+        public JwtTokenResult Refresh(string refreshToken, string accessToken, string guid)
         {
             var (principal, jwtToken) = Decode(accessToken);
             if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature))

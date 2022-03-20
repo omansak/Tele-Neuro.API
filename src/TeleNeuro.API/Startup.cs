@@ -96,13 +96,14 @@ namespace TeleNeuro.API
             services.AddDbContext<TeleNeuroDatabaseContext>(options => options.UseSqlServer(Configuration["Credential:ConnectionString"]));
             //Dependencies
             services.AddHttpContextAccessor();
-            services.AddJWTAuthenticationManager(new JWTTokenConfig
+            services.AddJWTAuthenticationManager(new JwtTokenConfig
             {
-                Issuer = Configuration["JWTTokenConfig:Issuer"],
-                Audience = Configuration["JWTTokenConfig:Audience"],
-                Secret = Configuration["JWTTokenConfig:Secret"],
+                Issuer = Configuration["JwtTokenConfig:Issuer"],
+                Audience = Configuration["JwtTokenConfig:Audience"],
+                Secret = Configuration["JwtTokenConfig:Secret"],
                 AccessTokenExpirationMinute = 60 * 24 * 7,
-                RefreshTokenExpirationMinute = 60 * 24 * 30
+                RefreshTokenExpirationMinute = 60 * 24 * 30,
+                UseRefreshToken = true
             });
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IUserManagerService, UserManagerService>();
@@ -219,11 +220,11 @@ namespace TeleNeuro.API
                     i.SaveToken = true;
                     i.TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["JWTTokenConfig:Secret"])),
-                        ValidIssuer = Configuration["JWTTokenConfig:Issuer"],
-                        ValidAudience = Configuration["JWTTokenConfig:Audience"],
-                        ValidateIssuer = !string.IsNullOrWhiteSpace(Configuration["JWTTokenConfig:Issuer"]),
-                        ValidateAudience = !string.IsNullOrWhiteSpace(Configuration["JWTTokenConfig:Audience"]),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["JwtTokenConfig:Secret"])),
+                        ValidIssuer = Configuration["JwtTokenConfig:Issuer"],
+                        ValidAudience = Configuration["JwtTokenConfig:Audience"],
+                        ValidateIssuer = !string.IsNullOrWhiteSpace(Configuration["JwtTokenConfig:Issuer"]),
+                        ValidateAudience = !string.IsNullOrWhiteSpace(Configuration["JwtTokenConfig:Audience"]),
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         ClockSkew = TimeSpan.FromMinutes(1)

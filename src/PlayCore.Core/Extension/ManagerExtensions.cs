@@ -7,14 +7,14 @@ namespace PlayCore.Core.Extension
     {
         public static IServiceCollection AddJWTAuthenticationManager(this IServiceCollection services)
         {
-            services.AddHostedService<JWTManagerRefreshCache>();
-            services.AddSingleton<IJWTAuthenticationManager>(i => new JWTAuthenticationManager(new JWTTokenConfig()));
+            services.AddHostedService<JwtManagerRefreshCache>();
+            services.AddSingleton<IJwtAuthenticationManager>(i => new JwtAuthenticationManager(new JwtTokenConfig()));
             return services;
         }
-        public static IServiceCollection AddJWTAuthenticationManager(this IServiceCollection services, JWTTokenConfig config)
+        public static IServiceCollection AddJWTAuthenticationManager(this IServiceCollection services, JwtTokenConfig config)
         {
-            services.AddHostedService<JWTManagerRefreshCache>();
-            services.AddSingleton<IJWTAuthenticationManager>(i => new JWTAuthenticationManager(config));
+            services.AddHostedService<JwtManagerRefreshCache>();
+            services.AddSingleton<IJwtAuthenticationManager>(i => new JwtAuthenticationManager(config));
             return services;
         }
     }

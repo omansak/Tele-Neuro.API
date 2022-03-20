@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace PlayCore.Core.Managers.JWTAuthenticationManager
 {
-    class JWTManagerRefreshCache : IHostedService
+    class JwtManagerRefreshCache : IHostedService
     {
         private Timer _timer;
-        private readonly IJWTAuthenticationManager _jwtAuthenticationManager;
+        private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
 
-        public JWTManagerRefreshCache(IJWTAuthenticationManager jwtAuthenticationManager)
+        public JwtManagerRefreshCache(IJwtAuthenticationManager jwtAuthenticationManager)
         {
             _jwtAuthenticationManager = jwtAuthenticationManager;
         }

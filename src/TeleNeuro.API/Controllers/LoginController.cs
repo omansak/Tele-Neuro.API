@@ -21,10 +21,10 @@ namespace TeleNeuro.API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IUserManagerService _userManagerService;
-        private readonly IJWTAuthenticationManager _jwtAuthenticationManager;
+        private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
         private readonly IBasicLogger<IUserService> _basicLogger;
 
-        public LoginController(IUserService userService, IJWTAuthenticationManager jwtAuthenticationManager, IUserManagerService userManagerService, IBasicLogger<IUserService> basicLogger)
+        public LoginController(IUserService userService, IJwtAuthenticationManager jwtAuthenticationManager, IUserManagerService userManagerService, IBasicLogger<IUserService> basicLogger)
         {
             _userService = userService;
             _jwtAuthenticationManager = jwtAuthenticationManager;
@@ -32,7 +32,7 @@ namespace TeleNeuro.API.Controllers
             _basicLogger = basicLogger;
         }
         [HttpPost]
-        public async Task<BaseResponse<JWTTokenResult>> Login(UserLoginModel model)
+        public async Task<BaseResponse<JwtTokenResult>> Login(UserLoginModel model)
         {
             _basicLogger.LogInfo("User Login", model);
             var (user, roles) = await _userService.Login(model);
@@ -43,7 +43,7 @@ namespace TeleNeuro.API.Controllers
                     new(ClaimTypes.NameIdentifier, user.Id.ToString())
                 };
                 roles?.ForEach(i => claims.Add(new Claim(ClaimTypes.Role, i.Key)));
-                return new BaseResponse<JWTTokenResult>().SetResult(_jwtAuthenticationManager.Generate(user.Id.ToString(), claims));
+                return new BaseResponse<JwtTokenResult>().SetResult(_jwtAuthenticationManager.Generate(user.Id.ToString(), claims));
             }
 
             throw new UIException("Kullanıcı girişi başarısız");
@@ -57,13 +57,13 @@ namespace TeleNeuro.API.Controllers
         }
         [HttpPost]
         [Authorize]
-        public BaseResponse<JWTTokenResult> RefreshToken(RefreshTokenModel model)
+        public BaseResponse<JwtTokenResult> RefreshToken(RefreshTokenModel model)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(model.RefreshToken))
                     throw new UIException("Yenileme anahtarı bulunamadı.").SetResultCode(401);
-                return new BaseResponse<JWTTokenResult>().SetResult(_jwtAuthenticationManager.Refresh(model.RefreshToken, _userManagerService.Token, _userManagerService.UserId.ToString()));
+                return new BaseResponse<JwtTokenResult>().SetResult(_jwtAuthenticationManager.Refresh(model.RefreshToken, _userManagerService.Token, _userManagerService.UserId.ToString()));
             }
             catch (SecurityTokenException e)
             {

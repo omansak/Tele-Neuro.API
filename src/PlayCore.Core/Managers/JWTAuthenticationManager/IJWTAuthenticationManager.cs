@@ -5,12 +5,12 @@ using System.Security.Claims;
 
 namespace PlayCore.Core.Managers.JWTAuthenticationManager
 {
-    public interface IJWTAuthenticationManager
+    public interface IJwtAuthenticationManager
     {
         void RemoveExpiredRefreshTokens(DateTime now);
         void RemoveRefreshToken(string guid);
-        JWTTokenResult Generate(string guid, IEnumerable<Claim> claims);
-        JWTTokenResult Refresh(string refreshToken, string accessToken, string guid);
+        JwtTokenResult Generate(string guid, IEnumerable<Claim> claims);
+        JwtTokenResult Refresh(string refreshToken, string accessToken, string guid);
         (ClaimsPrincipal, JwtSecurityToken) Decode(string token);
     }
 }
